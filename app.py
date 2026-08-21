@@ -288,14 +288,14 @@ st.markdown("""
 
     /* Login form */
     .login-form-container {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(20px);
-        border: 2px solid rgba(255, 255, 255, 0.25);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 100%);
+        backdrop-filter: blur(25px);
+        border: 2px solid rgba(255, 255, 255, 0.4);
         border-radius: 30px;
         padding: 3rem 2.5rem;
         max-width: 420px;
         margin: 0 auto;
-        box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.3);
+        box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
     .form-title {
@@ -305,7 +305,22 @@ st.markdown("""
         margin-bottom: 2.5rem;
         text-align: center;
         letter-spacing: 0.5px;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Section headers in forms */
+    .section-header {
+        color: #ffffff !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 0.8rem !important;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+        letter-spacing: 0.5px !important;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     /* Input fields */
@@ -335,26 +350,46 @@ st.markdown("""
     /* Show labels */
     .stTextInput > label {
         color: #ffffff !important;
-        font-size: 0.9rem !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.5rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.6rem !important;
         letter-spacing: 0.3px !important;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+        display: block !important;
     }
 
     /* Number input */
     .stNumberInput > div > div > input {
         background: rgba(255, 255, 255, 1) !important;
-        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+        border: 2px solid rgba(102, 126, 234, 0.4) !important;
         border-radius: 12px !important;
         color: #000000 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+        padding: 0.9rem 1rem !important;
+        font-size: 0.95rem !important;
     }
 
     .stNumberInput > label {
         color: #ffffff !important;
-        font-weight: 600 !important;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+        margin-bottom: 0.6rem !important;
+    }
+
+    /* Checkbox */
+    .stCheckbox > label {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* Info/Success/Error boxes */
+    .stAlert {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
     }
 
     /* Buttons */
@@ -833,7 +868,7 @@ def merchant_signup_page():
         phone = st.text_input("Phone Number", placeholder="Enter your phone", key="signup_phone")
 
         # Address Info
-        st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">📍 Shop Location</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📍 Shop Location</div>', unsafe_allow_html=True)
 
         col_addr1, col_addr2 = st.columns(2)
         with col_addr1:
@@ -844,7 +879,7 @@ def merchant_signup_page():
         address = st.text_input("Full Address", placeholder="Street address", key="signup_address")
 
         # Geo-location
-        st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">🗺️ Geo-Location</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🗺️ Geo-Location</div>', unsafe_allow_html=True)
 
         use_current = st.checkbox("📍 Use Current Location (GPS)", key="use_current_location")
 
@@ -910,11 +945,7 @@ def merchant_signup_page():
             </div>
             """
 
-            location_data = components.html(location_html, height=200)
-
-            if location_data:
-                st.session_state.gps_latitude = location_data.get('lat', 19.0760)
-                st.session_state.gps_longitude = location_data.get('lon', 72.8777)
+            components.html(location_html, height=200)
 
             latitude = st.session_state.gps_latitude if st.session_state.gps_latitude else 19.0760
             longitude = st.session_state.gps_longitude if st.session_state.gps_longitude else 72.8777
@@ -927,7 +958,7 @@ def merchant_signup_page():
                 longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude")
 
         # Password
-        st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🔒 Security</div>', unsafe_allow_html=True)
         password = st.text_input("Password", type="password", placeholder="Create a password", key="signup_password")
         confirm_password = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="signup_confirm_password")
 
@@ -1106,11 +1137,7 @@ def discover_page():
             </div>
             """
 
-            discover_location_data = components.html(discover_location_html, height=180)
-
-            if discover_location_data:
-                st.session_state.discover_gps_lat = discover_location_data.get('lat')
-                st.session_state.discover_gps_lon = discover_location_data.get('lon')
+            components.html(discover_location_html, height=180)
 
             user_lat = st.session_state.discover_gps_lat if st.session_state.discover_gps_lat else 19.0760
             user_lon = st.session_state.discover_gps_lon if st.session_state.discover_gps_lon else 72.8777
