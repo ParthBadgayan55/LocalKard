@@ -8,23 +8,164 @@ from merchant_data import *
 CATEGORIES = ["Groceries", "Dairy", "Vegetables", "Fruits", "Bakery", "Pet Food", "Beverages", "Snacks", "Others"]
 UNITS = ["kg", "liter", "piece", "dozen", "packet", "grams", "ml"]
 
+# Light color palette
+COLORS = {
+    'primary': '#2E86DE',      # Clean Blue
+    'success': '#10AC84',      # Fresh Green
+    'warning': '#FF9F43',      # Warm Orange
+    'danger': '#EE5A6F',       # Soft Red
+    'info': '#54A0FF',         # Light Blue
+    'light_bg': '#F8F9FA',     # Almost White
+    'card_bg': '#FFFFFF',      # Pure White
+    'border': '#E1E8ED',       # Light Gray
+    'text_dark': '#2C3E50',    # Dark Blue-Gray
+    'text_muted': '#636E72'    # Medium Gray
+}
+
 def merchant_dashboard_main(merchant_data):
-    """Main merchant dashboard"""
+    """Main merchant dashboard with light clean theme"""
     merchant_phone = merchant_data['phone']
 
-    # Sidebar Navigation
+    # Custom CSS for light theme
+    st.markdown(f"""
+    <style>
+        /* Main app background */
+        .main {{
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+        }}
+
+        /* Sidebar styling */
+        [data-testid="stSidebar"] {{
+            background: linear-gradient(180deg, {COLORS['card_bg']} 0%, {COLORS['light_bg']} 100%);
+            border-right: 2px solid {COLORS['border']};
+        }}
+
+        /* Sidebar text */
+        [data-testid="stSidebar"] * {{
+            color: {COLORS['text_dark']} !important;
+        }}
+
+        /* Radio buttons */
+        .stRadio > label {{
+            color: {COLORS['text_dark']} !important;
+            font-weight: 600 !important;
+        }}
+
+        /* Cards */
+        .metric-card {{
+            background: {COLORS['card_bg']};
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid {COLORS['border']};
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }}
+
+        /* Section headers */
+        .section-header {{
+            color: {COLORS['text_dark']};
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 3px solid {COLORS['primary']};
+        }}
+
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {{
+            background: {COLORS['card_bg']};
+            border-radius: 10px;
+            padding: 0.5rem;
+            gap: 0.5rem;
+        }}
+
+        .stTabs [data-baseweb="tab"] {{
+            color: {COLORS['text_dark']};
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+        }}
+
+        .stTabs [aria-selected="true"] {{
+            background: {COLORS['primary']};
+            color: white !important;
+        }}
+
+        /* Buttons */
+        .stButton > button {{
+            background: {COLORS['primary']};
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }}
+
+        .stButton > button:hover {{
+            background: #1E5FA8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46,134,222,0.3);
+        }}
+
+        /* Input fields */
+        .stTextInput > div > div > input,
+        .stNumberInput > div > div > input,
+        .stSelectbox > div > div > select {{
+            background: {COLORS['card_bg']};
+            border: 1px solid {COLORS['border']};
+            border-radius: 8px;
+            color: {COLORS['text_dark']};
+        }}
+
+        /* Metrics */
+        [data-testid="stMetricValue"] {{
+            color: {COLORS['text_dark']};
+            font-size: 2rem;
+            font-weight: 700;
+        }}
+
+        [data-testid="stMetricLabel"] {{
+            color: {COLORS['text_muted']};
+            font-weight: 600;
+        }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Sidebar Navigation with clean design
     st.sidebar.markdown(f"""
-    <div style='padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin-bottom: 1rem;'>
-        <div style='color: white; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem;'>🏪 {merchant_data['name']}</div>
-        <div style='color: rgba(255,255,255,0.9); font-size: 0.85rem;'>{merchant_data['owner']}</div>
+    <div style='padding: 1.5rem; background: linear-gradient(135deg, {COLORS['primary']} 0%, {COLORS['info']} 100%);
+                border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+        <div style='color: white; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;'>🏪 {merchant_data['name']}</div>
+        <div style='color: rgba(255,255,255,0.95); font-size: 0.9rem; font-weight: 500;'>{merchant_data['owner']}</div>
+        <div style='color: rgba(255,255,255,0.85); font-size: 0.8rem; margin-top: 0.3rem;'>📱 {merchant_data['phone']}</div>
     </div>
     """, unsafe_allow_html=True)
 
+    # Navigation sections
+    st.sidebar.markdown(f"<div style='color: {COLORS['text_muted']}; font-size: 0.75rem; font-weight: 700; "
+                       f"text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.8rem 0;'>Main Menu</div>",
+                       unsafe_allow_html=True)
+
     menu = st.sidebar.radio(
         "Navigation",
-        ["🏠 Dashboard", "🛍️ Products", "💳 Points System", "📦 Orders", "👥 Customers", "📊 Analytics", "⚙️ Settings"],
+        ["🏠 Dashboard", "🛍️ Products", "💳 Points System", "📦 Orders"],
         label_visibility="collapsed"
     )
+
+    st.sidebar.markdown(f"<div style='color: {COLORS['text_muted']}; font-size: 0.75rem; font-weight: 700; "
+                       f"text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.8rem 0;'>Management</div>",
+                       unsafe_allow_html=True)
+
+    menu2 = st.sidebar.radio(
+        "Management",
+        ["👥 Customers", "📊 Analytics", "⚙️ Settings"],
+        label_visibility="collapsed"
+    )
+
+    # Combine menu selection
+    if menu2:
+        menu = menu2
+
+    st.sidebar.markdown("<div style='margin-top: 2rem;'></div>", unsafe_allow_html=True)
 
     if st.sidebar.button("🚪 Logout", use_container_width=True):
         st.session_state.logged_in = False
@@ -48,8 +189,8 @@ def merchant_dashboard_main(merchant_data):
         settings_page(merchant_phone, merchant_data)
 
 def dashboard_home(merchant_phone, merchant_data):
-    """Dashboard home with metrics"""
-    st.title("📊 Dashboard Overview")
+    """Dashboard home with metrics - Light theme"""
+    st.markdown(f"<div class='section-header'>📊 Dashboard Overview</div>", unsafe_allow_html=True)
 
     # Load data
     products = load_products(merchant_phone)
@@ -65,26 +206,72 @@ def dashboard_home(merchant_phone, merchant_data):
     in_stock_products = len([p for p in products if p.get('stock', False)])
 
     # Metrics Row 1
+    st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Today's Orders", len(today_orders), "+3")
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['primary']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>TODAY'S ORDERS</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(today_orders)}</div>
+            <div style='color: {COLORS['success']}; font-size: 0.8rem; margin-top: 0.3rem;'>↑ +3 from yesterday</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col2:
-        st.metric("Today's Revenue", f"₹{today_revenue:,.0f}", "+15%")
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['success']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>TODAY'S REVENUE</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>₹{today_revenue:,.0f}</div>
+            <div style='color: {COLORS['success']}; font-size: 0.8rem; margin-top: 0.3rem;'>↑ +15% growth</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col3:
-        st.metric("Active Products", in_stock_products)
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['info']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>ACTIVE PRODUCTS</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{in_stock_products}</div>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.8rem; margin-top: 0.3rem;'>In stock now</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col4:
-        st.metric("Pending Orders", len(pending_orders))
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['warning']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>PENDING ORDERS</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(pending_orders)}</div>
+            <div style='color: {COLORS['warning']}; font-size: 0.8rem; margin-top: 0.3rem;'>Need attention</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Metrics Row 2
+    st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Total Products", len(products))
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>TOTAL PRODUCTS</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(products)}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col2:
-        st.metric("Total Customers", len(customers))
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>TOTAL CUSTOMERS</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(customers)}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col3:
-        st.metric("Points Disbursed", f"{points_stats['disbursed']:,.0f}")
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>POINTS DISBURSED</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['disbursed']:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col4:
-        st.metric("Points Redeemed", f"{points_stats['redeemed']:,.0f}")
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>POINTS REDEEMED</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['redeemed']:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 
@@ -92,41 +279,54 @@ def dashboard_home(merchant_phone, merchant_data):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("📦 Recent Orders")
+        st.markdown(f"<h3 style='color: {COLORS['text_dark']}; margin-bottom: 1rem;'>📦 Recent Orders</h3>", unsafe_allow_html=True)
         if orders:
             recent_orders = sorted(orders, key=lambda x: x.get('created_at', ''), reverse=True)[:5]
             for order in recent_orders:
-                status_color = {"pending": "orange", "confirmed": "blue", "ready": "green", "delivered": "gray"}
+                status_colors = {"pending": COLORS['warning'], "confirmed": COLORS['info'], "ready": COLORS['success'], "delivered": COLORS['text_muted']}
+                status_color = status_colors.get(order.get('status', 'pending'), COLORS['text_muted'])
                 st.markdown(f"""
-                <div style='padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 0.5rem;'>
-                    <div style='color: white; font-weight: 600;'>{order.get('id')} - {order.get('customer_name', 'N/A')}</div>
-                    <div style='color: #a0a0c0; font-size: 0.85rem;'>₹{order.get('total', 0)} • <span style='color: {status_color.get(order.get('status', 'pending'), 'gray')}'>{order.get('status', 'pending').upper()}</span></div>
+                <div style='padding: 1.2rem; background: {COLORS['card_bg']}; border-radius: 10px;
+                            margin-bottom: 0.8rem; border: 1px solid {COLORS['border']}; box-shadow: 0 2px 4px rgba(0,0,0,0.04);'>
+                    <div style='color: {COLORS['text_dark']}; font-weight: 700; font-size: 1rem;'>{order.get('id')} - {order.get('customer_name', 'N/A')}</div>
+                    <div style='color: {COLORS['text_muted']}; font-size: 0.9rem; margin-top: 0.3rem;'>
+                        ₹{order.get('total', 0)} • <span style='color: {status_color}; font-weight: 600;'>{order.get('status', 'pending').upper()}</span>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.info("No orders yet")
+            st.info("📦 No orders yet")
 
     with col2:
-        st.subheader("📈 Quick Stats")
+        st.markdown(f"<h3 style='color: {COLORS['text_dark']}; margin-bottom: 1rem;'>📈 Quick Stats</h3>", unsafe_allow_html=True)
         st.markdown(f"""
-        <div style='padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;'>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'>Total Orders: <span style='color: white; font-weight: 600;'>{len(orders)}</span></div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'>Average Order: <span style='color: white; font-weight: 600;'>₹{(sum(o.get('total', 0) for o in orders) / len(orders)) if orders else 0:,.0f}</span></div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'>Outstanding Points: <span style='color: white; font-weight: 600;'>{points_stats['outstanding']:,.0f}</span></div>
-            <div style='color: #a0a0c0;'>Points Transactions: <span style='color: white; font-weight: 600;'>{points_stats['total_transactions']}</span></div>
+        <div style='padding: 1.5rem; background: {COLORS['card_bg']}; border-radius: 10px;
+                    border: 1px solid {COLORS['border']}; box-shadow: 0 2px 4px rgba(0,0,0,0.04);'>
+            <div style='color: {COLORS['text_muted']}; margin-bottom: 0.8rem; font-size: 0.9rem;'>
+                Total Orders: <span style='color: {COLORS['text_dark']}; font-weight: 700; font-size: 1.1rem;'>{len(orders)}</span>
+            </div>
+            <div style='color: {COLORS['text_muted']}; margin-bottom: 0.8rem; font-size: 0.9rem;'>
+                Average Order: <span style='color: {COLORS['text_dark']}; font-weight: 700; font-size: 1.1rem;'>₹{(sum(o.get('total', 0) for o in orders) / len(orders)) if orders else 0:,.0f}</span>
+            </div>
+            <div style='color: {COLORS['text_muted']}; margin-bottom: 0.8rem; font-size: 0.9rem;'>
+                Outstanding Points: <span style='color: {COLORS['text_dark']}; font-weight: 700; font-size: 1.1rem;'>{points_stats['outstanding']:,.0f}</span>
+            </div>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.9rem;'>
+                Points Transactions: <span style='color: {COLORS['text_dark']}; font-weight: 700; font-size: 1.1rem;'>{points_stats['total_transactions']}</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
 def product_management(merchant_phone):
-    """Product catalog management"""
-    st.title("🛍️ Product Management")
+    """Product catalog management - Light theme"""
+    st.markdown(f"<div class='section-header'>🛍️ Product Management</div>", unsafe_allow_html=True)
 
     tab1, tab2, tab3 = st.tabs(["📋 All Products", "➕ Add Product", "📊 Inventory"])
 
     products = load_products(merchant_phone)
 
     with tab1:
-        st.subheader("Product Catalog")
+        st.markdown(f"<h3 style='color: {COLORS['text_dark']}; margin-bottom: 1.5rem;'>📦 Product Catalog</h3>", unsafe_allow_html=True)
 
         if products:
             # Search and filter
@@ -149,29 +349,42 @@ def product_management(merchant_phone):
             elif stock_filter == "Out of Stock":
                 filtered = [p for p in filtered if not p.get('stock', False)]
 
-            st.markdown(f"**{len(filtered)} products**")
+            st.markdown(f"<div style='color: {COLORS['text_muted']}; font-weight: 600; margin: 1rem 0;'>{len(filtered)} products found</div>", unsafe_allow_html=True)
 
             for product in filtered:
-                col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                stock_badge_color = COLORS['success'] if product.get('stock') else COLORS['danger']
+                stock_badge_text = "✓ In Stock" if product.get('stock') else "✗ Out of Stock"
 
+                st.markdown(f"""
+                <div style='padding: 1.5rem; background: {COLORS['card_bg']}; border-radius: 12px;
+                            margin-bottom: 1rem; border: 1px solid {COLORS['border']}; box-shadow: 0 2px 6px rgba(0,0,0,0.05);'>
+                    <div style='display: flex; justify-content: space-between; align-items: start;'>
+                        <div style='flex: 2;'>
+                            <div style='color: {COLORS['text_dark']}; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;'>
+                                {product.get('name')}
+                            </div>
+                            <div style='color: {COLORS['text_muted']}; font-size: 0.9rem;'>
+                                {product.get('category', 'N/A')} • <span style='color: {stock_badge_color}; font-weight: 600;'>{stock_badge_text}</span>
+                            </div>
+                        </div>
+                        <div style='flex: 1; text-align: right;'>
+                            <div style='color: {COLORS['primary']}; font-size: 1.3rem; font-weight: 700;'>₹{product.get('price', 0)}</div>
+                            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem;'>per {product.get('unit', 'unit')}</div>
+                        </div>
+                        <div style='flex: 1; text-align: right;'>
+                            <div style='color: {COLORS['info']}; font-size: 0.9rem;'>💎 {product.get('points', 0) if product.get('points') else 'Global'} pts</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                col1, col2 = st.columns([1, 1])
                 with col1:
-                    stock_badge = "🟢 In Stock" if product.get('stock') else "🔴 Out of Stock"
-                    st.markdown(f"""
-                    **{product.get('name')}**
-                    {product.get('category', 'N/A')} • {stock_badge}
-                    """)
-
-                with col2:
-                    st.markdown(f"**₹{product.get('price', 0)}**/{product.get('unit', 'unit')}")
-
-                with col3:
-                    points_text = f"{product.get('points', 0)} pts" if product.get('points') else "Global rate"
-                    st.markdown(f"💎 {points_text}")
-
-                with col4:
-                    if st.button("✏️", key=f"edit_{product.get('id')}", help="Edit"):
+                    if st.button("✏️ Edit", key=f"edit_{product.get('id')}", use_container_width=True):
                         st.session_state[f'edit_product_{product.get("id")}'] = True
-                    if st.button("🗑️", key=f"del_{product.get('id')}", help="Delete"):
+                        st.rerun()
+                with col2:
+                    if st.button("🗑️ Delete", key=f"del_{product.get('id')}", use_container_width=True):
                         delete_product(merchant_phone, product.get('id'))
                         st.success(f"Deleted {product.get('name')}")
                         st.rerun()
@@ -181,7 +394,6 @@ def product_management(merchant_phone):
                     with st.expander("✏️ Edit Product", expanded=True):
                         edit_product_form(merchant_phone, product)
 
-                st.markdown("---")
         else:
             st.info("📦 No products yet. Add your first product!")
 
@@ -303,23 +515,44 @@ def edit_product_form(merchant_phone, product):
                 st.rerun()
 
 def points_system(merchant_phone):
-    """Cashback points system configuration"""
-    st.title("💳 Cashback Points System")
+    """Cashback points system configuration - Light theme"""
+    st.markdown(f"<div class='section-header'>💳 Cashback Points System</div>", unsafe_allow_html=True)
 
     config = load_points_config(merchant_phone)
     stats = get_points_stats(merchant_phone)
 
     # Points Overview
+    st.markdown("<div style='margin-bottom: 1.5rem;'></div>", unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("💎 Points Disbursed", f"{stats['disbursed']:,.0f}")
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['primary']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>💎 POINTS DISBURSED</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{stats['disbursed']:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col2:
-        st.metric("🎁 Points Redeemed", f"{stats['redeemed']:,.0f}")
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['success']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>🎁 POINTS REDEEMED</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{stats['redeemed']:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col3:
-        st.metric("📊 Outstanding", f"{stats['outstanding']:,.0f}")
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['warning']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>📊 OUTSTANDING</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{stats['outstanding']:,.0f}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with col4:
         avg_points = stats['disbursed'] / len(load_orders(merchant_phone)) if load_orders(merchant_phone) else 0
-        st.metric("📈 Avg/Order", f"{avg_points:.1f}")
+        st.markdown(f"""
+        <div class='metric-card' style='border-left: 4px solid {COLORS['info']};'>
+            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>📈 AVG/ORDER</div>
+            <div style='color: {COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{avg_points:.1f}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 
@@ -487,8 +720,8 @@ def points_system(merchant_phone):
             st.info("No data yet. Points analytics will appear once you have transactions.")
 
 def order_management(merchant_phone):
-    """Order management system"""
-    st.title("📦 Order Management")
+    """Order management system - Light theme"""
+    st.markdown(f"<div class='section-header'>📦 Order Management</div>", unsafe_allow_html=True)
 
     orders = load_orders(merchant_phone)
 
@@ -526,69 +759,104 @@ def order_management(merchant_phone):
             # Display orders
             for order in reversed(filtered_orders):
                 status_colors = {
-                    "pending": "#FF9800",
-                    "confirmed": "#2196F3",
-                    "ready": "#4CAF50",
-                    "delivered": "#9E9E9E",
-                    "cancelled": "#f44336"
+                    "pending": COLORS['warning'],
+                    "confirmed": COLORS['info'],
+                    "ready": COLORS['success'],
+                    "delivered": COLORS['text_muted'],
+                    "cancelled": COLORS['danger']
                 }
 
-                status_color = status_colors.get(order.get('status', 'pending'), "#9E9E9E")
+                status_color = status_colors.get(order.get('status', 'pending'), COLORS['text_muted'])
+                current_status = order.get('status', 'pending')
 
-                with st.container():
-                    col1, col2, col3 = st.columns([2, 1, 1])
+                st.markdown(f"""
+                <div style='padding: 1.5rem; background: {COLORS['card_bg']}; border-radius: 12px;
+                            margin-bottom: 1.5rem; border: 1px solid {COLORS['border']}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'>
+                    <div style='display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;'>
+                        <div>
+                            <div style='color: {COLORS['text_dark']}; font-size: 1.3rem; font-weight: 700;'>{order.get('id')}</div>
+                            <div style='color: {COLORS['text_muted']}; font-size: 0.95rem; margin-top: 0.3rem;'>
+                                <strong>{order.get('customer_name')}</strong> • {order.get('customer_phone')}
+                            </div>
+                            <div style='color: {COLORS['text_muted']}; font-size: 0.85rem; margin-top: 0.2rem;'>
+                                {order.get('created_at', 'N/A')}
+                            </div>
+                        </div>
+                        <div style='text-align: right;'>
+                            <div style='color: {COLORS['primary']}; font-size: 1.5rem; font-weight: 700;'>₹{order.get('total', 0):,.0f}</div>
+                            <div style='background: {status_color}; color: white; padding: 0.3rem 0.8rem;
+                                        border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-top: 0.5rem;
+                                        text-transform: uppercase; display: inline-block;'>
+                                {order.get('status', 'pending')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-                    with col1:
-                        st.markdown(f"### {order.get('id')}")
-                        st.markdown(f"**{order.get('customer_name')}** • {order.get('customer_phone')}")
-                        st.markdown(f"*{order.get('created_at', 'N/A')}*")
+                # Status update buttons
+                col1, col2 = st.columns(2)
+                with col1:
+                    if current_status == 'pending':
+                        if st.button("✓ Confirm Order", key=f"conf_{order['id']}", use_container_width=True):
+                            update_order_status(merchant_phone, order['id'], 'confirmed')
+                            st.success("Order confirmed!")
+                            st.rerun()
+                    elif current_status == 'confirmed':
+                        if st.button("📦 Mark Ready", key=f"ready_{order['id']}", use_container_width=True):
+                            update_order_status(merchant_phone, order['id'], 'ready')
+                            st.success("Order marked ready!")
+                            st.rerun()
+                    elif current_status == 'ready':
+                        if st.button("✓ Mark Delivered", key=f"del_{order['id']}", use_container_width=True):
+                            update_order_status(merchant_phone, order['id'], 'delivered')
+                            # Add points transaction
+                            points = calculate_points_earned(merchant_phone, order.get('total', 0))
+                            add_points_transaction(merchant_phone, {
+                                'customer_phone': order.get('customer_phone'),
+                                'order_id': order['id'],
+                                'type': 'earned',
+                                'points': points
+                            })
+                            st.success(f"Order delivered! Customer earned {points} points")
+                            st.rerun()
 
-                    with col2:
-                        st.markdown(f"**₹{order.get('total', 0):,.0f}**")
-                        st.markdown(f"<span style='color: {status_color}; font-weight: 600;'>{order.get('status', 'pending').upper()}</span>", unsafe_allow_html=True)
+                with col2:
+                    # Order details expander button
+                    if st.button("📋 View Details", key=f"details_{order['id']}", use_container_width=True):
+                        st.session_state[f'show_details_{order["id"]}'] = not st.session_state.get(f'show_details_{order["id"]}', False)
 
-                    with col3:
-                        # Status update buttons
-                        current_status = order.get('status', 'pending')
+                # Order details
+                if st.session_state.get(f'show_details_{order["id"]}'):
+                    st.markdown(f"""
+                    <div style='padding: 1.2rem; background: {COLORS['light_bg']}; border-radius: 8px;
+                                margin-top: 0.5rem; border: 1px solid {COLORS['border']};'>
+                        <div style='color: {COLORS['text_dark']}; font-weight: 600; margin-bottom: 0.8rem;'>Order Items:</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                        if current_status == 'pending':
-                            if st.button("✓ Confirm", key=f"conf_{order['id']}"):
-                                update_order_status(merchant_phone, order['id'], 'confirmed')
-                                st.success("Order confirmed!")
-                                st.rerun()
-                        elif current_status == 'confirmed':
-                            if st.button("📦 Ready", key=f"ready_{order['id']}"):
-                                update_order_status(merchant_phone, order['id'], 'ready')
-                                st.success("Order marked ready!")
-                                st.rerun()
-                        elif current_status == 'ready':
-                            if st.button("✓ Delivered", key=f"del_{order['id']}"):
-                                update_order_status(merchant_phone, order['id'], 'delivered')
-                                # Add points transaction
-                                points = calculate_points_earned(merchant_phone, order.get('total', 0))
-                                add_points_transaction(merchant_phone, {
-                                    'customer_phone': order.get('customer_phone'),
-                                    'order_id': order['id'],
-                                    'type': 'earned',
-                                    'points': points
-                                })
-                                st.success(f"Order delivered! Customer earned {points} points")
-                                st.rerun()
+                    for item in order.get('items', []):
+                        st.markdown(f"""
+                        <div style='padding: 0.5rem 1.2rem; background: {COLORS['light_bg']}; color: {COLORS['text_dark']};'>
+                            • {item.get('name')} × {item.get('qty')} = ₹{item.get('price', 0) * item.get('qty', 0)}
+                        </div>
+                        """, unsafe_allow_html=True)
 
-                    # Order details expander
-                    with st.expander("View Details"):
-                        st.markdown("**Items:**")
-                        for item in order.get('items', []):
-                            st.markdown(f"- {item.get('name')} × {item.get('qty')} = ₹{item.get('price', 0) * item.get('qty', 0)}")
+                    st.markdown(f"""
+                    <div style='padding: 1.2rem; background: {COLORS['light_bg']}; border-radius: 0 0 8px 8px;
+                                border: 1px solid {COLORS['border']}; border-top: none;'>
+                        <div style='color: {COLORS['text_muted']}; margin-bottom: 0.5rem;'>
+                            <strong>Delivery:</strong> {order.get('delivery_method', 'N/A')}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                        st.markdown(f"**Total:** ₹{order.get('total', 0)}")
-                        st.markdown(f"**Delivery:** {order.get('delivery_method', 'N/A')}")
+                    # Contact customer
+                    whatsapp_link = f"https://wa.me/91{order.get('customer_phone')}?text=Hello%20{order.get('customer_name')},%20regarding%20your%20order%20{order.get('id')}"
+                    if st.button("💬 Contact on WhatsApp", key=f"whatsapp_{order['id']}", use_container_width=True):
+                        st.markdown(f'<meta http-equiv="refresh" content="0;url={whatsapp_link}">', unsafe_allow_html=True)
 
-                        # Contact customer
-                        whatsapp_link = f"https://wa.me/91{order.get('customer_phone')}?text=Hello%20{order.get('customer_name')},%20regarding%20your%20order%20{order.get('id')}"
-                        st.markdown(f"[💬 Contact on WhatsApp]({whatsapp_link})")
-
-                    st.markdown("---")
+                st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
         else:
             st.info("📦 No orders yet")
 
@@ -656,8 +924,8 @@ def order_management(merchant_phone):
                 st.warning("Add products first to create orders")
 
 def customer_management(merchant_phone):
-    """Customer database"""
-    st.title("👥 Customer Management")
+    """Customer database - Light theme"""
+    st.markdown(f"<div class='section-header'>👥 Customer Management</div>", unsafe_allow_html=True)
 
     customers = load_customers(merchant_phone)
     orders = load_orders(merchant_phone)
@@ -718,8 +986,8 @@ def customer_management(merchant_phone):
         st.info("👥 No customers yet. Customers appear after first order.")
 
 def analytics_page(merchant_phone):
-    """Analytics and reports"""
-    st.title("📊 Analytics & Reports")
+    """Analytics and reports - Light theme"""
+    st.markdown(f"<div class='section-header'>📊 Analytics & Reports</div>", unsafe_allow_html=True)
 
     products = load_products(merchant_phone)
     orders = load_orders(merchant_phone)
@@ -798,36 +1066,68 @@ def analytics_page(merchant_phone):
             st.info("No status data yet")
 
 def settings_page(merchant_phone, merchant_data):
-    """Settings and shop profile"""
-    st.title("⚙️ Settings")
+    """Settings and shop profile - Light theme"""
+    st.markdown(f"<div class='section-header'>⚙️ Settings</div>", unsafe_allow_html=True)
 
     tab1, tab2 = st.tabs(["🏪 Shop Profile", "🔐 Account"])
 
     with tab1:
-        st.subheader("Shop Information")
+        st.markdown(f"<h3 style='color: {COLORS['text_dark']}; margin-bottom: 1.5rem;'>🏪 Shop Information</h3>", unsafe_allow_html=True)
 
         st.markdown(f"""
-        <div style='padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: 15px;'>
-            <div style='color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;'>{merchant_data.get('name')}</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Owner:</strong> {merchant_data.get('owner')}</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Phone:</strong> {merchant_data.get('phone')}</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Address:</strong> {merchant_data.get('address', 'N/A')}</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Locality:</strong> {merchant_data.get('locality', 'N/A')}</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Pincode:</strong> {merchant_data.get('pincode', 'N/A')}</div>
-            <div style='color: #a0a0c0;'><strong>GPS:</strong> {merchant_data.get('latitude', 'N/A')}, {merchant_data.get('longitude', 'N/A')}</div>
+        <div style='padding: 2rem; background: {COLORS['card_bg']}; border-radius: 15px;
+                    border: 1px solid {COLORS['border']}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'>
+            <div style='color: {COLORS['text_dark']}; font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;'>
+                {merchant_data.get('name')}
+            </div>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Owner:</span>
+                <span style='float: right;'>{merchant_data.get('owner')}</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Phone:</span>
+                <span style='float: right;'>{merchant_data.get('phone')}</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Address:</span>
+                <span style='float: right;'>{merchant_data.get('address', 'N/A')}</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Locality:</span>
+                <span style='float: right;'>{merchant_data.get('locality', 'N/A')}</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Pincode:</span>
+                <span style='float: right;'>{merchant_data.get('pincode', 'N/A')}</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; padding: 0.5rem 0;'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>GPS Location:</span>
+                <span style='float: right;'>{merchant_data.get('latitude', 'N/A')}, {merchant_data.get('longitude', 'N/A')}</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
+        st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
         st.info("💡 Contact support to update shop details")
 
     with tab2:
-        st.subheader("Account Information")
+        st.markdown(f"<h3 style='color: {COLORS['text_dark']}; margin-bottom: 1.5rem;'>🔐 Account Information</h3>", unsafe_allow_html=True)
 
         st.markdown(f"""
-        <div style='padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: 15px;'>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Account Type:</strong> Merchant</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Phone:</strong> {merchant_data.get('phone')}</div>
-            <div style='color: #a0a0c0; margin-bottom: 0.5rem;'><strong>Status:</strong> <span style='color: #4CAF50;'>Active</span></div>
+        <div style='padding: 2rem; background: {COLORS['card_bg']}; border-radius: 15px;
+                    border: 1px solid {COLORS['border']}; box-shadow: 0 2px 8px rgba(0,0,0,0.06);'>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Account Type:</span>
+                <span style='float: right; color: {COLORS['primary']}; font-weight: 700;'>Merchant</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; margin-bottom: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid {COLORS['border']};'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Phone:</span>
+                <span style='float: right;'>{merchant_data.get('phone')}</span>
+            </div>
+            <div style='color: {COLORS['text_dark']}; padding: 0.5rem 0;'>
+                <span style='color: {COLORS['text_muted']}; font-weight: 600;'>Status:</span>
+                <span style='float: right; color: {COLORS['success']}; font-weight: 700;'>● Active</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
