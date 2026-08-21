@@ -111,19 +111,19 @@ st.markdown("""
 
     /* Main container */
     .main {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 50%, #F0F0F0 100%);
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
         padding: 0;
     }
 
     .stApp {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 50%, #F0F0F0 100%);
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     }
 
     /* Logo/Brand */
     .brand {
         font-size: 4rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%);
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -144,7 +144,7 @@ st.markdown("""
         display: inline-block;
         background: rgba(102, 126, 234, 0.2);
         border: 1px solid rgba(102, 126, 234, 0.5);
-        color: #2E86DE;
+        color: #667eea;
         padding: 0.5rem 1.5rem;
         border-radius: 30px;
         font-size: 0.85rem;
@@ -175,7 +175,7 @@ st.markdown("""
     }
 
     .swipe-text {
-        color: #2E86DE;
+        color: #667eea;
         font-size: 0.9rem;
         font-weight: 500;
         letter-spacing: 2px;
@@ -189,7 +189,7 @@ st.markdown("""
     }
 
     .swipe-arrow {
-        color: #2E86DE;
+        color: #667eea;
         font-size: 1.5rem;
         animation: swipeLeft 2s ease-in-out infinite;
         display: inline-block;
@@ -229,7 +229,7 @@ st.markdown("""
     .swipe-line {
         width: 60px;
         height: 2px;
-        background: linear-gradient(90deg, transparent 0%, #2E86DE 50%, transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
         border-radius: 2px;
         animation: pulse 2s ease-in-out infinite;
     }
@@ -243,11 +243,11 @@ st.markdown("""
         }
     }
 
-    /* Login cards - WHITE THEME */
+    /* Login cards */
     .login-card {
-        background: #FFFFFF;
-        backdrop-filter: none;
-        border: 2px solid #E1E8ED;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         padding: 2rem 1.5rem;
         width: 100%;
@@ -256,7 +256,7 @@ st.markdown("""
         margin: 0 auto;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -265,8 +265,8 @@ st.markdown("""
 
     .login-card:hover {
         transform: translateY(-5px);
-        border-color: #2E86DE;
-        box-shadow: 0 8px 24px 0 rgba(46, 134, 222, 0.2);
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 12px 48px 0 rgba(102, 126, 234, 0.3);
     }
 
     .card-icon {
@@ -275,24 +275,24 @@ st.markdown("""
     }
 
     .card-title {
-        color: #2C3E50;
+        color: #ffffff;
         font-size: 1.8rem;
         font-weight: 600;
         margin-bottom: 0.8rem;
     }
 
     .card-description {
-        color: #636E72;
+        color: #a0a0c0;
         font-size: 0.9rem;
         line-height: 1.5;
         text-align: center;
     }
 
-    /* About Us Section - WHITE */
+    /* About Us Section */
     .about-section {
-        background: #FFFFFF;
-        backdrop-filter: none;
-        border: 2px solid #E1E8ED;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 2.5rem;
         margin: 3rem auto 2rem auto;
@@ -364,7 +364,7 @@ st.markdown("""
     }
 
     .footer-brand {
-        color: #2E86DE;
+        color: #667eea;
         font-weight: 600;
         font-size: 1.1rem;
         margin-bottom: 0.5rem;
@@ -407,7 +407,7 @@ st.markdown("""
         margin-bottom: 0.8rem !important;
         text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
         letter-spacing: 0.5px !important;
-        background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%);
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -431,7 +431,7 @@ st.markdown("""
     }
 
     .stTextInput > div > div > input:focus {
-        border-color: #2E86DE !important;
+        border-color: #667eea !important;
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         background: rgba(255, 255, 255, 1) !important;
         outline: none !important;
@@ -484,7 +484,7 @@ st.markdown("""
 
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%);
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
         border-radius: 12px;
@@ -579,7 +579,7 @@ st.markdown("""
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%);
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         color: white !important;
     }
 </style>
@@ -1130,7 +1130,7 @@ def merchant_signup_page():
         phone = st.text_input("Phone Number *", placeholder="Enter your phone", key="signup_phone")
 
         # Address Info
-        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📍 Shop Location</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📍 Shop Location</div>', unsafe_allow_html=True)
 
         col_addr1, col_addr2 = st.columns(2)
         with col_addr1:
@@ -1141,7 +1141,7 @@ def merchant_signup_page():
         address = st.text_input("Full Address *", placeholder="Street address", key="signup_address")
 
         # Geo-location
-        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🗺️ Geo-Location *</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🗺️ Geo-Location *</div>', unsafe_allow_html=True)
 
         use_current = st.checkbox("📍 Use Current Location (GPS) - Recommended", key="use_current_location", value=True)
 
@@ -1198,10 +1198,10 @@ def merchant_signup_page():
             window.onload = getLocation;
             </script>
             <div style="padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
-                <div style="color: #2E86DE; font-weight: 600; margin-bottom: 10px;">📍 Fetching your GPS location...</div>
+                <div style="color: #667eea; font-weight: 600; margin-bottom: 10px;">📍 Fetching your GPS location...</div>
                 <div style="color: #a0a0c0; font-size: 0.9rem;">Please allow location access when prompted</div>
                 <div id="location-status"></div>
-                <button onclick="getLocation()" style="margin-top: 10px; padding: 8px 16px; background: #2E86DE; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button onclick="getLocation()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                     🔄 Refresh Location
                 </button>
             </div>
@@ -1220,7 +1220,7 @@ def merchant_signup_page():
                 longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude")
 
         # Password
-        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🔒 Security</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🔒 Security</div>', unsafe_allow_html=True)
         password = st.text_input("Password *", type="password", placeholder="Min 6 characters", key="signup_password")
         confirm_password = st.text_input("Confirm Password *", type="password", placeholder="Re-enter password", key="signup_confirm_password")
 
@@ -1431,9 +1431,9 @@ def discover_page():
             window.onload = getDiscoverLocation;
             </script>
             <div style="padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
-                <div style="color: #2E86DE; font-weight: 600;">📍 Getting your GPS location...</div>
+                <div style="color: #667eea; font-weight: 600;">📍 Getting your GPS location...</div>
                 <div id="discover-status" style="margin-top: 10px;"></div>
-                <button onclick="getDiscoverLocation()" style="margin-top: 10px; padding: 8px 16px; background: #2E86DE; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                <button onclick="getDiscoverLocation()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
                     🔄 Refresh
                 </button>
             </div>
@@ -1527,7 +1527,7 @@ def discover_page():
                             <div style="color: #a0a0c0; font-size: 0.95rem; margin-bottom: 0.3rem;">
                                 👤 {merchant['owner']}
                             </div>
-                            <div style="color: #2E86DE; font-size: 0.9rem; margin-bottom: 0.3rem;">
+                            <div style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.3rem;">
                                 📞 {phone}
                             </div>
                             <div style="color: #a0a0c0; font-size: 0.85rem;">
@@ -1535,7 +1535,7 @@ def discover_page():
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
-                            <div style="background: linear-gradient(90deg, #2E86DE 0%, #54A0FF 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                            <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
                                 📍 {distance_str}
                             </div>
                             <div style="background: rgba(102, 234, 144, 0.2); border: 1px solid rgba(102, 234, 144, 0.5); color: #66ea90; padding: 0.4rem 1rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500;">
