@@ -625,7 +625,7 @@ def merchant_login_page():
 # Customer Login
 def customer_login_page():
     # Add spacing
-    st.markdown("<div style='height: 2rem;'></div>", unsafe_handle_html=True)
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 1, 1])
 
