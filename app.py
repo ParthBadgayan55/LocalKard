@@ -996,7 +996,14 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    menu = st.sidebar.radio("Navigation", ["🏠 Dashboard", "🛍️ Products"], label_visibility="visible")
+    menu = st.sidebar.radio("Navigation", [
+        "🏠 Dashboard",
+        "🛍️ Products",
+        "💳 Points System",
+        "📦 Orders",
+        "👥 Customers",
+        "📊 Analytics"
+    ], label_visibility="visible")
 
     # Load data
     products = md_load_products(merchant_phone)
@@ -1097,6 +1104,165 @@ def merchant_dashboard():
                         st.rerun()
                     else:
                         st.error("Please fill all required fields")
+
+    elif menu == "💳 Points System":
+        st.markdown(f"<div class='section-header'>💳 Cashback Points System</div>", unsafe_allow_html=True)
+
+        # Points Overview
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown(f"""
+            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['primary']};'>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>POINTS DISBURSED</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['disbursed']:,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['success']};'>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>POINTS REDEEMED</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['redeemed']:,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"""
+            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['warning']};'>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>OUTSTANDING</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['outstanding']:,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col4:
+            st.markdown(f"""
+            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['info']};'>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>TOTAL TRANSACTIONS</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['total_transactions']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+        # Points Configuration
+        st.subheader("⚙️ Points Configuration")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            global_rate_amount = st.number_input("For every ₹", value=100.0, min_value=1.0, step=10.0)
+        with col2:
+            global_rate_points = st.number_input("Customer earns (points)", value=5.0, min_value=0.1, step=0.5)
+
+        rate_per_rupee = global_rate_points / global_rate_amount
+        st.info(f"**Current Rate:** ₹1 = {rate_per_rupee:.4f} points")
+
+        # Example calculations
+        st.markdown("### 📊 Example Calculations")
+        test_amounts = [50, 100, 250, 500, 1000]
+        examples = []
+        for amt in test_amounts:
+            pts = amt * rate_per_rupee
+            examples.append({"Order Amount": f"₹{amt}", "Points Earned": f"{pts:.1f}"})
+        st.table(pd.DataFrame(examples))
+
+        if st.button("💾 Save Points Configuration", use_container_width=True):
+            st.success(f"✓ Points rate saved: ₹{global_rate_amount} = {global_rate_points} points")
+            st.balloons()
+
+    elif menu == "📦 Orders":
+        st.markdown(f"<div class='section-header'>📦 Order Management</div>", unsafe_allow_html=True)
+
+        tab1, tab2 = st.tabs(["📋 All Orders", "➕ Create Test Order"])
+
+        with tab1:
+            if orders:
+                st.markdown(f"**{len(orders)} orders**")
+
+                for order in reversed(orders[-10:]):  # Show last 10
+                    status_colors = {
+                        "pending": MD_COLORS['warning'],
+                        "confirmed": MD_COLORS['info'],
+                        "ready": MD_COLORS['success'],
+                        "delivered": MD_COLORS['text_muted']
+                    }
+                    status_color = status_colors.get(order.get('status', 'pending'), MD_COLORS['text_muted'])
+
+                    st.markdown(f"""
+                    <div style='padding: 1.5rem; background: {MD_COLORS['card_bg']}; border-radius: 12px;
+                                margin-bottom: 1rem; border: 1px solid {MD_COLORS['border']}; box-shadow: 0 2px 6px rgba(0,0,0,0.05);'>
+                        <div style='display: flex; justify-content: space-between; align-items: start;'>
+                            <div>
+                                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.2rem; font-weight: 700;'>{order.get('id')}</div>
+                                <div style='color: {MD_COLORS['text_muted']}; margin-top: 0.3rem;'>
+                                    {order.get('customer_name', 'N/A')} • {order.get('customer_phone', 'N/A')}
+                                </div>
+                            </div>
+                            <div style='text-align: right;'>
+                                <div style='color: {MD_COLORS['primary']}; font-size: 1.3rem; font-weight: 700;'>₹{order.get('total', 0):,.0f}</div>
+                                <div style='background: {status_color}; color: white; padding: 0.3rem 0.8rem;
+                                            border-radius: 15px; font-size: 0.7rem; font-weight: 700; margin-top: 0.5rem;
+                                            text-transform: uppercase; display: inline-block;'>
+                                    {order.get('status', 'pending')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("📦 No orders yet")
+
+        with tab2:
+            st.subheader("Create Test Order")
+            st.info("💡 For testing purposes - create a sample order")
+
+            with st.form("create_test_order"):
+                col1, col2 = st.columns(2)
+                with col1:
+                    cust_name = st.text_input("Customer Name")
+                    cust_phone = st.text_input("Customer Phone")
+                with col2:
+                    order_total = st.number_input("Order Total (₹)", min_value=0.0, step=50.0, value=500.0)
+                    order_status = st.selectbox("Status", ["pending", "confirmed", "ready", "delivered"])
+
+                if st.form_submit_button("Create Order", use_container_width=True):
+                    if cust_name and cust_phone:
+                        order_id = f"ORD{len(orders)+1:04d}"
+                        st.success(f"✓ Order {order_id} created for ₹{order_total}!")
+                    else:
+                        st.error("Please fill customer details")
+
+    elif menu == "👥 Customers":
+        st.markdown(f"<div class='section-header'>👥 Customer Management</div>", unsafe_allow_html=True)
+
+        if len(customers) > 0:
+            st.markdown(f"**{len(customers)} customers**")
+            st.info("Customer database will populate as orders are created")
+        else:
+            st.info("👥 No customers yet. Customers appear after first order.")
+
+    elif menu == "📊 Analytics":
+        st.markdown(f"<div class='section-header'>📊 Analytics & Reports</div>", unsafe_allow_html=True)
+
+        if orders:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                total_revenue = sum(o.get('total', 0) for o in orders)
+                st.metric("Total Revenue", f"₹{total_revenue:,.0f}")
+            with col2:
+                avg_order = total_revenue / len(orders) if orders else 0
+                st.metric("Average Order", f"₹{avg_order:,.0f}")
+            with col3:
+                st.metric("Total Orders", len(orders))
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            # Product performance
+            st.subheader("Top Products")
+            if products:
+                top_products = products[:5]
+                for p in top_products:
+                    st.write(f"• {p.get('name')} - ₹{p.get('price')}/{p.get('unit')}")
+            else:
+                st.info("Add products to see analytics")
+        else:
+            st.info("📊 Analytics will appear once you have orders")
 
 # Customer Dashboard
 def customer_dashboard():
