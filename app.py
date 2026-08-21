@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
+import streamlit.components.v1 as components
 
 # Page config
 st.set_page_config(
@@ -287,14 +288,14 @@ st.markdown("""
 
     /* Login form */
     .login-form-container {
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.25);
         border-radius: 30px;
         padding: 3rem 2.5rem;
         max-width: 420px;
         margin: 0 auto;
-        box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.5);
+        box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.3);
     }
 
     .form-title {
@@ -304,17 +305,19 @@ st.markdown("""
         margin-bottom: 2.5rem;
         text-align: center;
         letter-spacing: 0.5px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     /* Input fields */
     .stTextInput > div > div > input {
-        background: rgba(255, 255, 255, 0.95) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        background: rgba(255, 255, 255, 1) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
         border-radius: 12px !important;
         color: #000000 !important;
         padding: 1rem 1.2rem !important;
         font-size: 0.95rem !important;
         transition: all 0.3s ease !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     }
 
     .stTextInput > div > div > input::placeholder {
@@ -324,7 +327,7 @@ st.markdown("""
 
     .stTextInput > div > div > input:focus {
         border-color: #667eea !important;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         background: rgba(255, 255, 255, 1) !important;
         outline: none !important;
     }
@@ -333,9 +336,25 @@ st.markdown("""
     .stTextInput > label {
         color: #ffffff !important;
         font-size: 0.9rem !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         margin-bottom: 0.5rem !important;
         letter-spacing: 0.3px !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Number input */
+    .stNumberInput > div > div > input {
+        background: rgba(255, 255, 255, 1) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+        border-radius: 12px !important;
+        color: #000000 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .stNumberInput > label {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
     }
 
     /* Buttons */
@@ -827,22 +846,85 @@ def merchant_signup_page():
         # Geo-location
         st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">🗺️ Geo-Location</div>', unsafe_allow_html=True)
 
-        use_current = st.checkbox("📍 Use Current Location", key="use_current_location")
+        use_current = st.checkbox("📍 Use Current Location (GPS)", key="use_current_location")
 
-        col_geo1, col_geo2 = st.columns(2)
-        with col_geo1:
-            if use_current:
-                latitude = st.number_input("Latitude", value=19.0760, format="%.6f", key="signup_latitude", disabled=True)
-            else:
-                latitude = st.number_input("Latitude", value=19.0760, format="%.6f", key="signup_latitude")
-        with col_geo2:
-            if use_current:
-                longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude", disabled=True)
-            else:
-                longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude")
+        # Initialize session state for location
+        if 'gps_latitude' not in st.session_state:
+            st.session_state.gps_latitude = None
+        if 'gps_longitude' not in st.session_state:
+            st.session_state.gps_longitude = None
 
         if use_current:
-            st.info("📍 Using default Mumbai coordinates. In production, this would fetch your actual location.")
+            # GPS Location Component
+            location_html = """
+            <script>
+            function getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+
+                            // Send to Streamlit
+                            window.parent.postMessage({
+                                type: 'streamlit:setComponentValue',
+                                value: {lat: lat, lon: lon}
+                            }, '*');
+
+                            document.getElementById('location-status').innerHTML =
+                                '<div style="color: #4CAF50; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; margin-top: 10px;">✓ Location detected: ' +
+                                lat.toFixed(6) + ', ' + lon.toFixed(6) + '</div>';
+                        },
+                        function(error) {
+                            let errorMsg = 'Unable to get location. ';
+                            if (error.code === 1) errorMsg += 'Permission denied.';
+                            else if (error.code === 2) errorMsg += 'Position unavailable.';
+                            else if (error.code === 3) errorMsg += 'Timeout.';
+
+                            document.getElementById('location-status').innerHTML =
+                                '<div style="color: #f44336; padding: 10px; background: rgba(244, 67, 54, 0.1); border-radius: 8px; margin-top: 10px;">✗ ' +
+                                errorMsg + '</div>';
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    document.getElementById('location-status').innerHTML =
+                        '<div style="color: #f44336; padding: 10px; background: rgba(244, 67, 54, 0.1); border-radius: 8px; margin-top: 10px;">✗ Geolocation not supported</div>';
+                }
+            }
+
+            // Auto-trigger on load
+            window.onload = getLocation;
+            </script>
+            <div style="padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                <div style="color: #667eea; font-weight: 600; margin-bottom: 10px;">📍 Fetching your GPS location...</div>
+                <div style="color: #a0a0c0; font-size: 0.9rem;">Please allow location access when prompted</div>
+                <div id="location-status"></div>
+                <button onclick="getLocation()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    🔄 Refresh Location
+                </button>
+            </div>
+            """
+
+            location_data = components.html(location_html, height=200)
+
+            if location_data:
+                st.session_state.gps_latitude = location_data.get('lat', 19.0760)
+                st.session_state.gps_longitude = location_data.get('lon', 72.8777)
+
+            latitude = st.session_state.gps_latitude if st.session_state.gps_latitude else 19.0760
+            longitude = st.session_state.gps_longitude if st.session_state.gps_longitude else 72.8777
+
+        else:
+            col_geo1, col_geo2 = st.columns(2)
+            with col_geo1:
+                latitude = st.number_input("Latitude", value=19.0760, format="%.6f", key="signup_latitude")
+            with col_geo2:
+                longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude")
 
         # Password
         st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
@@ -968,25 +1050,77 @@ def discover_page():
 
         st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">📍 Your Location</div>', unsafe_allow_html=True)
 
-        use_live = st.checkbox("📍 Use Current Location", value=True, key="use_live_location")
+        use_live = st.checkbox("📍 Use Current Location (GPS)", value=False, key="use_live_location")
 
-        col_loc1, col_loc2 = st.columns(2)
-        with col_loc1:
-            if use_live:
-                user_lat = 19.0760  # Default Mumbai coordinates
-                st.text_input("Latitude", value=f"{user_lat:.6f}", disabled=True, key="discover_lat_display")
-            else:
-                user_lat = st.number_input("Latitude", value=19.0760, format="%.6f", key="discover_lat")
-
-        with col_loc2:
-            if use_live:
-                user_lon = 72.8777  # Default Mumbai coordinates
-                st.text_input("Longitude", value=f"{user_lon:.6f}", disabled=True, key="discover_lon_display")
-            else:
-                user_lon = st.number_input("Longitude", value=72.8777, format="%.6f", key="discover_lon")
+        # Initialize session state
+        if 'discover_gps_lat' not in st.session_state:
+            st.session_state.discover_gps_lat = None
+        if 'discover_gps_lon' not in st.session_state:
+            st.session_state.discover_gps_lon = None
 
         if use_live:
-            st.info("📍 Using Mumbai city center. In production, this would use your actual GPS location.")
+            # GPS Component for Discover
+            discover_location_html = """
+            <script>
+            function getDiscoverLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+
+                            window.parent.postMessage({
+                                type: 'streamlit:setComponentValue',
+                                value: {lat: lat, lon: lon}
+                            }, '*');
+
+                            document.getElementById('discover-status').innerHTML =
+                                '<div style="color: #4CAF50; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; margin-top: 10px;">✓ Your location: ' +
+                                lat.toFixed(6) + ', ' + lon.toFixed(6) + '</div>';
+                        },
+                        function(error) {
+                            let errorMsg = 'Unable to get location. ';
+                            if (error.code === 1) errorMsg += 'Permission denied - please enable location.';
+                            else if (error.code === 2) errorMsg += 'Position unavailable.';
+                            else if (error.code === 3) errorMsg += 'Timeout.';
+
+                            document.getElementById('discover-status').innerHTML =
+                                '<div style="color: #f44336; padding: 10px; background: rgba(244, 67, 54, 0.1); border-radius: 8px; margin-top: 10px;">✗ ' +
+                                errorMsg + '</div>';
+                        },
+                        {enableHighAccuracy: true, timeout: 5000, maximumAge: 0}
+                    );
+                } else {
+                    document.getElementById('discover-status').innerHTML =
+                        '<div style="color: #f44336;">✗ Geolocation not supported</div>';
+                }
+            }
+            window.onload = getDiscoverLocation;
+            </script>
+            <div style="padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                <div style="color: #667eea; font-weight: 600;">📍 Getting your GPS location...</div>
+                <div id="discover-status" style="margin-top: 10px;"></div>
+                <button onclick="getDiscoverLocation()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    🔄 Refresh
+                </button>
+            </div>
+            """
+
+            discover_location_data = components.html(discover_location_html, height=180)
+
+            if discover_location_data:
+                st.session_state.discover_gps_lat = discover_location_data.get('lat')
+                st.session_state.discover_gps_lon = discover_location_data.get('lon')
+
+            user_lat = st.session_state.discover_gps_lat if st.session_state.discover_gps_lat else 19.0760
+            user_lon = st.session_state.discover_gps_lon if st.session_state.discover_gps_lon else 72.8777
+
+        else:
+            col_loc1, col_loc2 = st.columns(2)
+            with col_loc1:
+                user_lat = st.number_input("Latitude", value=19.0760, format="%.6f", key="discover_lat")
+            with col_loc2:
+                user_lon = st.number_input("Longitude", value=72.8777, format="%.6f", key="discover_lon")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
