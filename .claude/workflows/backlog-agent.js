@@ -190,13 +190,14 @@ phase('Report');
 
 log('📝 Generating backlog report...');
 
-const now = new Date().toISOString().split('T')[0];
+// Use args.timestamp if provided, otherwise use placeholder
+const timestamp = args?.timestamp || '2026-08-21';
 const total = categorized.length;
 
 // Build markdown report
 let report = `# 🎯 Technical Backlog Report
 
-**Generated:** ${now}
+**Generated:** ${timestamp}
 **Total Items:** ${total}
 **Priority Breakdown:** Critical: ${bySeverity.critical.length} | High: ${bySeverity.high.length} | Medium: ${bySeverity.medium.length} | Low: ${bySeverity.low.length}
 
