@@ -5,6 +5,13 @@ import streamlit.components.v1 as components
 import json
 import os
 
+# Import merchant data management
+try:
+    from merchant_data import *
+except ImportError:
+    # Fallback if import fails
+    pass
+
 # Page config
 st.set_page_config(
     page_title="LocalKard - The Unified Loyalty & Commerce Network",
@@ -837,51 +844,9 @@ def customer_login_page():
 
 # Merchant Dashboard
 def merchant_dashboard():
-    st.markdown(f"""
-    <div class="dashboard-header">
-        <div class="dashboard-title">Welcome, {st.session_state.current_user['owner']}</div>
-        <div class="dashboard-subtitle">{st.session_state.current_user['name']}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("Logout", key="merchant_logout"):
-        st.session_state.logged_in = False
-        st.session_state.page = 'landing'
-        st.rerun()
-
-    # Metrics
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Today's Orders", "12", "+3")
-    with col2:
-        st.metric("Revenue", "₹4,250", "+15%")
-    with col3:
-        st.metric("Active Products", "24", "")
-    with col4:
-        st.metric("Pending Orders", "5", "")
-
-    st.write("")
-
-    # Tabs
-    tab1, tab2, tab3 = st.tabs(["📦 Orders", "🛍️ Products", "📊 Analytics"])
-
-    with tab1:
-        st.subheader("Recent Orders")
-        orders_data = {
-            "Order ID": ["ORD001", "ORD002", "ORD003"],
-            "Customer": ["Amit Patel", "Priya Shah", "Rahul Kumar"],
-            "Amount": ["₹420", "₹217", "₹160"],
-            "Status": ["Pending", "Confirmed", "Ready"]
-        }
-        st.dataframe(pd.DataFrame(orders_data), use_container_width=True)
-
-    with tab2:
-        st.subheader("Product Catalog")
-        st.write("Manage your products here")
-
-    with tab3:
-        st.subheader("Sales Analytics")
-        st.write("View your business insights")
+    """Main merchant dashboard - calls comprehensive dashboard module"""
+    from merchant_dashboard import merchant_dashboard_main
+    merchant_dashboard_main(st.session_state.current_user)
 
 # Customer Dashboard
 def customer_dashboard():
