@@ -12,22 +12,31 @@ import os
 # Data directory
 DATA_DIR = 'merchant_data'
 
-# Light color palette
+# World-Class Color Palette for Loyalty System
 MD_COLORS = {
-    'primary': '#2E86DE',
-    'success': '#10AC84',
-    'warning': '#FF9F43',
-    'danger': '#EE5A6F',
-    'info': '#54A0FF',
-    'light_bg': '#F8F9FA',
-    'card_bg': '#FFFFFF',
-    'border': '#E1E8ED',
-    'text_dark': '#2C3E50',
-    'text_muted': '#636E72'
+    'primary': '#6366F1',      # Indigo - Premium feel
+    'success': '#10B981',      # Emerald - Growth/rewards
+    'warning': '#F59E0B',      # Amber - Attention
+    'danger': '#EF4444',       # Rose - Critical
+    'info': '#3B82F6',         # Blue - Information
+    'purple': '#8B5CF6',       # Purple - Premium tier
+    'gold': '#F59E0B',         # Gold - Top tier
+    'silver': '#94A3B8',       # Silver - Mid tier
+    'bronze': '#CD7F32',       # Bronze - Entry tier
+    'light_bg': '#F9FAFB',     # Almost white
+    'card_bg': '#FFFFFF',      # Pure white
+    'border': '#E5E7EB',       # Light border
+    'text_dark': '#111827',    # Almost black
+    'text_muted': '#6B7280'    # Gray
 }
 
-MD_CATEGORIES = ["Groceries", "Dairy", "Vegetables", "Fruits", "Bakery", "Pet Food", "Beverages", "Snacks", "Others"]
-MD_UNITS = ["kg", "liter", "piece", "dozen", "packet", "grams", "ml"]
+# Loyalty Tiers
+LOYALTY_TIERS = {
+    'bronze': {'name': 'Bronze', 'min_points': 0, 'multiplier': 1.0, 'color': MD_COLORS['bronze']},
+    'silver': {'name': 'Silver', 'min_points': 500, 'multiplier': 1.25, 'color': MD_COLORS['silver']},
+    'gold': {'name': 'Gold', 'min_points': 2000, 'multiplier': 1.5, 'color': MD_COLORS['gold']},
+    'platinum': {'name': 'Platinum', 'min_points': 5000, 'multiplier': 2.0, 'color': MD_COLORS['purple']}
+}
 
 def md_ensure_dir(merchant_phone):
     merchant_dir = os.path.join(DATA_DIR, str(merchant_phone))
@@ -89,7 +98,98 @@ def md_get_points_stats(merchant_phone):
     }
 
 def md_load_customers(merchant_phone):
+    try:
+        merchant_dir = md_ensure_dir(merchant_phone)
+        customers_file = os.path.join(merchant_dir, 'customers.json')
+        if os.path.exists(customers_file):
+            with open(customers_file, 'r') as f:
+                return json.load(f)
+    except:
+        pass
     return []
+
+def md_save_customers(merchant_phone, customers):
+    try:
+        merchant_dir = md_ensure_dir(merchant_phone)
+        customers_file = os.path.join(merchant_dir, 'customers.json')
+        with open(customers_file, 'w') as f:
+            json.dump(customers, f, indent=2)
+        return True
+    except:
+        return False
+
+def md_add_customer(merchant_phone, customer_data):
+    customers = md_load_customers(merchant_phone)
+    customer_data['id'] = f"CUST{len(customers)+1:05d}"
+    customer_data['joined_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    customer_data['points_balance'] = 0
+    customer_data['tier'] = 'bronze'
+    customer_data['lifetime_points'] = 0
+    customers.append(customer_data)
+    md_save_customers(merchant_phone, customers)
+    return customer_data['id']
+
+def md_load_loyalty_config(merchant_phone):
+    try:
+        merchant_dir = md_ensure_dir(merchant_phone)
+        config_file = os.path.join(merchant_dir, 'loyalty_config.json')
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                return json.load(f)
+    except:
+        pass
+    return {
+        'earning_rate': {'amount': 100, 'points': 5},
+        'redemption_rate': {'points': 100, 'value': 10},
+        'tier_benefits': True,
+        'expiry_enabled': False,
+        'expiry_days': 365,
+        'referral_bonus': 50,
+        'birthday_bonus': 100
+    }
+
+def md_save_loyalty_config(merchant_phone, config):
+    try:
+        merchant_dir = md_ensure_dir(merchant_phone)
+        config_file = os.path.join(merchant_dir, 'loyalty_config.json')
+        with open(config_file, 'w') as f:
+            json.dump(config, f, indent=2)
+        return True
+    except:
+        return False
+
+def md_load_transactions(merchant_phone):
+    try:
+        merchant_dir = md_ensure_dir(merchant_phone)
+        trans_file = os.path.join(merchant_dir, 'transactions.json')
+        if os.path.exists(trans_file):
+            with open(trans_file, 'r') as f:
+                return json.load(f)
+    except:
+        pass
+    return []
+
+def md_save_transaction(merchant_phone, transaction):
+    transactions = md_load_transactions(merchant_phone)
+    transaction['id'] = f"TXN{len(transactions)+1:06d}"
+    transaction['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    transactions.append(transaction)
+    try:
+        merchant_dir = md_ensure_dir(merchant_phone)
+        trans_file = os.path.join(merchant_dir, 'transactions.json')
+        with open(trans_file, 'w') as f:
+            json.dump(transactions, f, indent=2)
+        return True
+    except:
+        return False
+
+def md_get_customer_tier(lifetime_points):
+    """Determine customer tier based on lifetime points"""
+    for tier_key in reversed(['platinum', 'gold', 'silver', 'bronze']):
+        tier = LOYALTY_TIERS[tier_key]
+        if lifetime_points >= tier['min_points']:
+            return tier_key
+    return 'bronze'
 
 # ============================================================================
 
@@ -925,59 +1025,53 @@ def customer_login_page():
 
 # Merchant Dashboard
 def merchant_dashboard():
-    """Inline merchant dashboard - no imports needed!"""
+    """World-Class Loyalty Management System"""
     merchant_data = st.session_state.current_user
     merchant_phone = merchant_data['phone']
 
-    # Custom CSS for light theme
+    # Premium CSS
     st.markdown(f"""
     <style>
-        .main {{ background: linear-gradient(135deg, {MD_COLORS['light_bg']} 0%, #E9ECEF 100%); }}
-        .metric-card {{
+        .main {{ background: linear-gradient(135deg, {MD_COLORS['light_bg']} 0%, #F3F4F6 100%); }}
+        .premium-card {{
             background: {MD_COLORS['card_bg']};
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid {MD_COLORS['border']};
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }}
+        .stat-card {{
+            background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['purple']} 100%);
             padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid {MD_COLORS['border']};
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            color: white;
         }}
-        .section-header {{
-            color: {MD_COLORS['text_dark']};
-            font-size: 1.8rem;
+        .tier-badge {{
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 3px solid {MD_COLORS['primary']};
-        }}
-        .top-nav {{
-            background: {MD_COLORS['card_bg']};
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            display: inline-block;
         }}
     </style>
     """, unsafe_allow_html=True)
 
-    # TOP NAVIGATION BAR - Always visible
+    # Top Navigation Bar
     st.markdown(f"""
-    <div style='background: {MD_COLORS['card_bg']}; padding: 1.2rem 2rem; border-radius: 12px;
-                margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-                display: flex; justify-content: space-between; align-items: center;'>
-        <div>
-            <div style='color: {MD_COLORS['text_dark']}; font-size: 1.3rem; font-weight: 700;'>
-                🏪 {merchant_data['name']}
-            </div>
-            <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; margin-top: 0.2rem;'>
-                {merchant_data['owner']} • {merchant_data['phone']}
-            </div>
+    <div style='background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['purple']} 100%);
+                padding: 1.5rem 2rem; border-radius: 16px; margin-bottom: 2rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);'>
+        <div style='color: white; font-size: 1.6rem; font-weight: 800;'>
+            💎 {merchant_data['name']} Loyalty Hub
+        </div>
+        <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-top: 0.3rem;'>
+            {merchant_data['owner']} • Powering Customer Loyalty
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # LOGOUT button at top
+    # Logout
     col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
     with col4:
         if st.button("🚪 Logout", use_container_width=True):
@@ -985,286 +1079,312 @@ def merchant_dashboard():
             st.session_state.page = 'landing'
             st.rerun()
 
-    st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
 
-    # Sidebar Navigation
+    # Sidebar
     st.sidebar.markdown(f"""
-    <div style='padding: 1.5rem; background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['info']} 100%);
-                border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
-        <div style='color: white; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem;'>Merchant Portal</div>
-        <div style='color: rgba(255,255,255,0.85); font-size: 0.8rem;'>Navigate below</div>
+    <div style='padding: 1.5rem; background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['purple']} 100%);
+                border-radius: 12px; margin-bottom: 1.5rem;'>
+        <div style='color: white; font-size: 1.1rem; font-weight: 700;'>🎯 Loyalty Dashboard</div>
+        <div style='color: rgba(255,255,255,0.85); font-size: 0.75rem; margin-top: 0.3rem;'>World-Class System</div>
     </div>
     """, unsafe_allow_html=True)
 
-    menu = st.sidebar.radio("Navigation", [
-        "🏠 Dashboard",
-        "🛍️ Products",
-        "💳 Points System",
-        "📦 Orders",
-        "👥 Customers",
-        "📊 Analytics"
-    ], label_visibility="visible")
+    menu = st.sidebar.radio("Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"], label_visibility="visible")
 
     # Load data
-    products = md_load_products(merchant_phone)
-    orders = md_load_orders(merchant_phone)
-    points_stats = md_get_points_stats(merchant_phone)
     customers = md_load_customers(merchant_phone)
+    loyalty_config = md_load_loyalty_config(merchant_phone)
+    transactions = md_load_transactions(merchant_phone)
 
-    if menu == "🏠 Dashboard":
-        st.markdown(f"<div class='section-header'>📊 Dashboard Overview</div>", unsafe_allow_html=True)
+    # Calculate KPIs
+    total_customers = len(customers)
+    active_customers = len([c for c in customers if c.get('points_balance', 0) > 0])
+    total_points_issued = sum(c.get('lifetime_points', 0) for c in customers)
+    total_points_redeemed = total_points_issued - sum(c.get('points_balance', 0) for c in customers)
+    outstanding_liability = sum(c.get('points_balance', 0) for c in customers)
+    redemption_rate = (total_points_redeemed / total_points_issued * 100) if total_points_issued > 0 else 0
 
-        # Metrics
+    if menu == "🏠 Home":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>📊 Loyalty Overview</h1>", unsafe_allow_html=True)
+
+        # Row 1 - Primary KPIs
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['primary']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>TOTAL PRODUCTS</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(products)}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            in_stock = len([p for p in products if p.get('stock')])
-            st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['success']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>IN STOCK</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{in_stock}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['info']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>TOTAL ORDERS</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(orders)}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col4:
-            st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['warning']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>CUSTOMERS</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{len(customers)}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.success("✅ Dashboard loaded successfully! All features working.")
-
-    elif menu == "🛍️ Products":
-        st.markdown(f"<div class='section-header'>🛍️ Product Management</div>", unsafe_allow_html=True)
-
-        tab1, tab2 = st.tabs(["📋 All Products", "➕ Add Product"])
-
-        with tab1:
-            if products:
-                st.markdown(f"**{len(products)} products**")
-                for product in products:
-                    stock_color = MD_COLORS['success'] if product.get('stock') else MD_COLORS['danger']
-                    stock_text = "✓ In Stock" if product.get('stock') else "✗ Out of Stock"
-
-                    st.markdown(f"""
-                    <div style='padding: 1.2rem; background: {MD_COLORS['card_bg']}; border-radius: 12px;
-                                margin-bottom: 1rem; border: 1px solid {MD_COLORS['border']};'>
-                        <div style='color: {MD_COLORS['text_dark']}; font-size: 1.1rem; font-weight: 700;'>{product.get('name')}</div>
-                        <div style='color: {MD_COLORS['text_muted']}; margin-top: 0.3rem;'>
-                            {product.get('category')} • ₹{product.get('price')}/{product.get('unit')} •
-                            <span style='color: {stock_color}; font-weight: 600;'>{stock_text}</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                    if st.button("🗑️ Delete", key=f"del_{product.get('id')}"):
-                        md_delete_product(merchant_phone, product.get('id'))
-                        st.success("Deleted!")
-                        st.rerun()
-            else:
-                st.info("📦 No products yet. Add your first product!")
-
-        with tab2:
-            with st.form("add_product"):
-                col1, col2 = st.columns(2)
-                with col1:
-                    name = st.text_input("Product Name *")
-                    category = st.selectbox("Category", MD_CATEGORIES)
-                    price = st.number_input("Price (₹)", min_value=0.0, step=1.0)
-                with col2:
-                    unit = st.selectbox("Unit", MD_UNITS)
-                    stock = st.checkbox("In Stock", value=True)
-
-                if st.form_submit_button("➕ Add Product", use_container_width=True):
-                    if name and price > 0:
-                        product_data = {
-                            "name": name,
-                            "category": category,
-                            "price": float(price),
-                            "unit": unit,
-                            "stock": stock
-                        }
-                        product_id = md_add_product(merchant_phone, product_data)
-                        st.success(f"✓ Added {name}! ID: {product_id}")
-                        st.balloons()
-                        st.rerun()
-                    else:
-                        st.error("Please fill all required fields")
-
-    elif menu == "💳 Points System":
-        st.markdown(f"<div class='section-header'>💳 Cashback Points System</div>", unsafe_allow_html=True)
-
-        # Points Overview
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['primary']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>POINTS DISBURSED</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['disbursed']:,.0f}</div>
+            <div class='stat-card'>
+                <div style='font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.5rem;'>TOTAL CUSTOMERS</div>
+                <div style='font-size: 2.5rem; font-weight: 800;'>{total_customers}</div>
+                <div style='font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;'>Enrolled in program</div>
             </div>
             """, unsafe_allow_html=True)
         with col2:
             st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['success']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>POINTS REDEEMED</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['redeemed']:,.0f}</div>
+            <div class='stat-card' style='background: linear-gradient(135deg, {MD_COLORS['success']} 0%, {MD_COLORS['info']} 100%);'>
+                <div style='font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.5rem;'>ACTIVE CUSTOMERS</div>
+                <div style='font-size: 2.5rem; font-weight: 800;'>{active_customers}</div>
+                <div style='font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;'>With points balance</div>
             </div>
             """, unsafe_allow_html=True)
         with col3:
             st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['warning']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>OUTSTANDING</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['outstanding']:,.0f}</div>
+            <div class='stat-card' style='background: linear-gradient(135deg, {MD_COLORS['gold']} 0%, {MD_COLORS['warning']} 100%);'>
+                <div style='font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.5rem;'>POINTS ISSUED</div>
+                <div style='font-size: 2.5rem; font-weight: 800;'>{total_points_issued:,.0f}</div>
+                <div style='font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;'>Lifetime rewards</div>
             </div>
             """, unsafe_allow_html=True)
         with col4:
             st.markdown(f"""
-            <div class='metric-card' style='border-left: 4px solid {MD_COLORS['info']};'>
-                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; font-weight: 600;'>TOTAL TRANSACTIONS</div>
-                <div style='color: {MD_COLORS['text_dark']}; font-size: 2rem; font-weight: 700;'>{points_stats['total_transactions']}</div>
+            <div class='stat-card' style='background: linear-gradient(135deg, {MD_COLORS['danger']} 0%, {MD_COLORS['warning']} 100%);'>
+                <div style='font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.5rem;'>OUTSTANDING</div>
+                <div style='font-size: 2.5rem; font-weight: 800;'>{outstanding_liability:,.0f}</div>
+                <div style='font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;'>Points liability</div>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
 
-        # Points Configuration
-        st.subheader("⚙️ Points Configuration")
-
-        col1, col2 = st.columns(2)
+        # Row 2 - Secondary KPIs
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
-            global_rate_amount = st.number_input("For every ₹", value=100.0, min_value=1.0, step=10.0)
+            avg_points = total_points_issued / total_customers if total_customers > 0 else 0
+            st.metric("Avg Points/Customer", f"{avg_points:,.0f}", "Lifetime")
         with col2:
-            global_rate_points = st.number_input("Customer earns (points)", value=5.0, min_value=0.1, step=0.5)
+            st.metric("Redemption Rate", f"{redemption_rate:.1f}%", "All time")
+        with col3:
+            engagement_rate = (active_customers / total_customers * 100) if total_customers > 0 else 0
+            st.metric("Engagement Rate", f"{engagement_rate:.0f}%", "Active users")
+        with col4:
+            st.metric("Total Transactions", len(transactions), "All time")
 
-        rate_per_rupee = global_rate_points / global_rate_amount
-        st.info(f"**Current Rate:** ₹1 = {rate_per_rupee:.4f} points")
+        st.markdown("<div style='margin: 3rem 0;'></div>", unsafe_allow_html=True)
 
-        # Example calculations
-        st.markdown("### 📊 Example Calculations")
-        test_amounts = [50, 100, 250, 500, 1000]
-        examples = []
-        for amt in test_amounts:
-            pts = amt * rate_per_rupee
-            examples.append({"Order Amount": f"₹{amt}", "Points Earned": f"{pts:.1f}"})
-        st.table(pd.DataFrame(examples))
+        # Tier Distribution
+        st.markdown(f"<h2 style='color: {MD_COLORS['text_dark']}; font-weight: 700; margin-bottom: 1.5rem;'>🏆 Customer Tiers</h2>", unsafe_allow_html=True)
 
-        if st.button("💾 Save Points Configuration", use_container_width=True):
-            st.success(f"✓ Points rate saved: ₹{global_rate_amount} = {global_rate_points} points")
-            st.balloons()
+        tier_counts = {'bronze': 0, 'silver': 0, 'gold': 0, 'platinum': 0}
+        for customer in customers:
+            tier = customer.get('tier', 'bronze')
+            tier_counts[tier] = tier_counts.get(tier, 0) + 1
 
-    elif menu == "📦 Orders":
-        st.markdown(f"<div class='section-header'>📦 Order Management</div>", unsafe_allow_html=True)
+        col1, col2, col3, col4 = st.columns(4)
+        for idx, (tier_key, tier_info) in enumerate(LOYALTY_TIERS.items()):
+            with [col1, col2, col3, col4][idx]:
+                count = tier_counts.get(tier_key, 0)
+                pct = (count / total_customers * 100) if total_customers > 0 else 0
+                st.markdown(f"""
+                <div class='premium-card' style='text-align: center;'>
+                    <div class='tier-badge' style='background: {tier_info["color"]}; color: white;'>
+                        {tier_info["name"].upper()}
+                    </div>
+                    <div style='font-size: 2rem; font-weight: 800; color: {MD_COLORS['text_dark']}; margin: 1rem 0;'>
+                        {count}
+                    </div>
+                    <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem;'>
+                        {pct:.0f}% of customers
+                    </div>
+                    <div style='color: {MD_COLORS['text_muted']}; font-size: 0.75rem; margin-top: 0.5rem;'>
+                        {tier_info["multiplier"]}x points
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-        tab1, tab2 = st.tabs(["📋 All Orders", "➕ Create Test Order"])
+    elif menu == "💎 Loyalty":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>💎 Loyalty Program Configuration</h1>", unsafe_allow_html=True)
+
+        tab1, tab2, tab3 = st.tabs(["⚙️ Points Rules", "🎁 Rewards & Tiers", "📊 Program Analytics"])
 
         with tab1:
-            if orders:
-                st.markdown(f"**{len(orders)} orders**")
+            st.markdown("### Points Earning Rules")
 
-                for order in reversed(orders[-10:]):  # Show last 10
-                    status_colors = {
-                        "pending": MD_COLORS['warning'],
-                        "confirmed": MD_COLORS['info'],
-                        "ready": MD_COLORS['success'],
-                        "delivered": MD_COLORS['text_muted']
-                    }
-                    status_color = status_colors.get(order.get('status', 'pending'), MD_COLORS['text_muted'])
+            col1, col2 = st.columns(2)
+            with col1:
+                earning_amount = st.number_input("For every ₹ spent", value=float(loyalty_config['earning_rate']['amount']), min_value=1.0, step=10.0)
+            with col2:
+                earning_points = st.number_input("Customer earns (points)", value=float(loyalty_config['earning_rate']['points']), min_value=0.1, step=0.5)
+
+            rate = earning_points / earning_amount
+            st.success(f"**Earning Rate:** ₹1 = {rate:.4f} points")
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            st.markdown("### Points Redemption Rules")
+            col1, col2 = st.columns(2)
+            with col1:
+                redeem_points = st.number_input("Points to redeem", value=float(loyalty_config['redemption_rate']['points']), min_value=1.0, step=10.0)
+            with col2:
+                redeem_value = st.number_input("Worth ₹", value=float(loyalty_config['redemption_rate']['value']), min_value=1.0, step=1.0)
+
+            redeem_rate = redeem_value / redeem_points
+            st.success(f"**Redemption Rate:** 1 point = ₹{redeem_rate:.2f}")
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            st.markdown("### Bonus Points")
+            col1, col2 = st.columns(2)
+            with col1:
+                referral_bonus = st.number_input("Referral Bonus", value=loyalty_config.get('referral_bonus', 50), min_value=0, step=10, help="Points for referring a friend")
+            with col2:
+                birthday_bonus = st.number_input("Birthday Bonus", value=loyalty_config.get('birthday_bonus', 100), min_value=0, step=10, help="Birthday gift points")
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            if st.button("💾 Save Configuration", use_container_width=True):
+                new_config = {
+                    'earning_rate': {'amount': earning_amount, 'points': earning_points},
+                    'redemption_rate': {'points': redeem_points, 'value': redeem_value},
+                    'referral_bonus': referral_bonus,
+                    'birthday_bonus': birthday_bonus,
+                    'tier_benefits': True
+                }
+                md_save_loyalty_config(merchant_phone, new_config)
+                st.success("✓ Configuration saved successfully!")
+                st.balloons()
+
+        with tab2:
+            st.markdown("### 🏆 Loyalty Tiers & Benefits")
+
+            for tier_key, tier_info in LOYALTY_TIERS.items():
+                st.markdown(f"""
+                <div class='premium-card' style='margin-bottom: 1rem; border-left: 4px solid {tier_info["color"]};'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <div>
+                            <span class='tier-badge' style='background: {tier_info["color"]}; color: white;'>
+                                {tier_info["name"].upper()}
+                            </span>
+                            <div style='color: {MD_COLORS['text_dark']}; font-size: 1.1rem; font-weight: 700; margin-top: 0.8rem;'>
+                                Minimum {tier_info["min_points"]:,} lifetime points
+                            </div>
+                            <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem; margin-top: 0.3rem;'>
+                                Earn {tier_info["multiplier"]}x points on every purchase
+                            </div>
+                        </div>
+                        <div style='text-align: right;'>
+                            <div style='font-size: 2.5rem; font-weight: 800; color: {tier_info["color"]};'>
+                                {tier_info["multiplier"]}x
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with tab3:
+            st.markdown("### Program Performance")
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Points Liability", f"₹{outstanding_liability * redeem_rate:,.0f}", help="Total value of outstanding points")
+            with col2:
+                st.metric("Redemption Rate", f"{redemption_rate:.1f}%")
+            with col3:
+                roi = ((total_points_redeemed * redeem_rate) / (total_points_issued * redeem_rate) * 100) if total_points_issued > 0 else 0
+                st.metric("Program ROI", f"{roi:.0f}%")
+
+    elif menu == "👥 Customers":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>👥 Customer Loyalty Management</h1>", unsafe_allow_html=True)
+
+        tab1, tab2 = st.tabs(["📋 All Customers", "➕ Add Customer"])
+
+        with tab1:
+            if customers:
+                st.markdown(f"**{len(customers)} customers enrolled**")
+
+                for customer in customers:
+                    tier = customer.get('tier', 'bronze')
+                    tier_info = LOYALTY_TIERS[tier]
 
                     st.markdown(f"""
-                    <div style='padding: 1.5rem; background: {MD_COLORS['card_bg']}; border-radius: 12px;
-                                margin-bottom: 1rem; border: 1px solid {MD_COLORS['border']}; box-shadow: 0 2px 6px rgba(0,0,0,0.05);'>
+                    <div class='premium-card' style='margin-bottom: 1rem;'>
                         <div style='display: flex; justify-content: space-between; align-items: start;'>
-                            <div>
-                                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.2rem; font-weight: 700;'>{order.get('id')}</div>
-                                <div style='color: {MD_COLORS['text_muted']}; margin-top: 0.3rem;'>
-                                    {order.get('customer_name', 'N/A')} • {order.get('customer_phone', 'N/A')}
+                            <div style='flex: 2;'>
+                                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.2rem; font-weight: 700;'>
+                                    {customer.get('name', 'N/A')}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem; margin-top: 0.3rem;'>
+                                    📱 {customer.get('phone', 'N/A')} • ID: {customer.get('id', 'N/A')}
+                                </div>
+                                <div style='margin-top: 0.8rem;'>
+                                    <span class='tier-badge' style='background: {tier_info["color"]}; color: white;'>
+                                        {tier_info["name"].upper()}
+                                    </span>
                                 </div>
                             </div>
                             <div style='text-align: right;'>
-                                <div style='color: {MD_COLORS['primary']}; font-size: 1.3rem; font-weight: 700;'>₹{order.get('total', 0):,.0f}</div>
-                                <div style='background: {status_color}; color: white; padding: 0.3rem 0.8rem;
-                                            border-radius: 15px; font-size: 0.7rem; font-weight: 700; margin-top: 0.5rem;
-                                            text-transform: uppercase; display: inline-block;'>
-                                    {order.get('status', 'pending')}
+                                <div style='color: {MD_COLORS['primary']}; font-size: 2rem; font-weight: 800;'>
+                                    {customer.get('points_balance', 0):,.0f}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.75rem;'>points balance</div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.75rem; margin-top: 0.3rem;'>
+                                    {customer.get('lifetime_points', 0):,.0f} lifetime
                                 </div>
                             </div>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
             else:
-                st.info("📦 No orders yet")
+                st.info("👥 No customers yet. Add your first customer to start building loyalty!")
 
         with tab2:
-            st.subheader("Create Test Order")
-            st.info("💡 For testing purposes - create a sample order")
+            st.markdown("### Add New Customer")
 
-            with st.form("create_test_order"):
+            with st.form("add_customer"):
                 col1, col2 = st.columns(2)
                 with col1:
-                    cust_name = st.text_input("Customer Name")
-                    cust_phone = st.text_input("Customer Phone")
+                    name = st.text_input("Customer Name *")
+                    phone = st.text_input("Phone Number *")
                 with col2:
-                    order_total = st.number_input("Order Total (₹)", min_value=0.0, step=50.0, value=500.0)
-                    order_status = st.selectbox("Status", ["pending", "confirmed", "ready", "delivered"])
+                    email = st.text_input("Email (optional)")
+                    initial_points = st.number_input("Initial Points Bonus", min_value=0, value=0, step=10)
 
-                if st.form_submit_button("Create Order", use_container_width=True):
-                    if cust_name and cust_phone:
-                        order_id = f"ORD{len(orders)+1:04d}"
-                        st.success(f"✓ Order {order_id} created for ₹{order_total}!")
+                if st.form_submit_button("➕ Add Customer", use_container_width=True):
+                    if name and phone:
+                        customer_data = {
+                            'name': name,
+                            'phone': phone,
+                            'email': email,
+                            'points_balance': initial_points,
+                            'lifetime_points': initial_points,
+                            'tier': md_get_customer_tier(initial_points)
+                        }
+                        customer_id = md_add_customer(merchant_phone, customer_data)
+                        st.success(f"✓ Customer {name} added! ID: {customer_id}")
+                        st.balloons()
+                        st.rerun()
                     else:
-                        st.error("Please fill customer details")
-
-    elif menu == "👥 Customers":
-        st.markdown(f"<div class='section-header'>👥 Customer Management</div>", unsafe_allow_html=True)
-
-        if len(customers) > 0:
-            st.markdown(f"**{len(customers)} customers**")
-            st.info("Customer database will populate as orders are created")
-        else:
-            st.info("👥 No customers yet. Customers appear after first order.")
+                        st.error("Please fill required fields")
 
     elif menu == "📊 Analytics":
-        st.markdown(f"<div class='section-header'>📊 Analytics & Reports</div>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>📊 Loyalty Analytics</h1>", unsafe_allow_html=True)
 
-        if orders:
-            col1, col2, col3 = st.columns(3)
+        # Key Metrics
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Customer Lifetime Value", f"₹{(total_points_issued * 0.1):,.0f}", help="Estimated CLV based on points")
+        with col2:
+            st.metric("Avg Points/Customer", f"{(total_points_issued / total_customers) if total_customers > 0 else 0:,.0f}")
+        with col3:
+            st.metric("Active Rate", f"{(active_customers / total_customers * 100) if total_customers > 0 else 0:.0f}%")
+        with col4:
+            st.metric("Program Health", "Excellent" if redemption_rate < 50 else "Good")
+
+        st.markdown("<div style='margin: 3rem 0;'></div>", unsafe_allow_html=True)
+
+        # Charts
+        if customers:
+            col1, col2 = st.columns(2)
+
             with col1:
-                total_revenue = sum(o.get('total', 0) for o in orders)
-                st.metric("Total Revenue", f"₹{total_revenue:,.0f}")
+                st.markdown("### Tier Distribution")
+                tier_data = pd.DataFrame(list(tier_counts.items()), columns=['Tier', 'Count'])
+                st.bar_chart(tier_data.set_index('Tier'))
+
             with col2:
-                avg_order = total_revenue / len(orders) if orders else 0
-                st.metric("Average Order", f"₹{avg_order:,.0f}")
-            with col3:
-                st.metric("Total Orders", len(orders))
+                st.markdown("### Points Distribution")
+                st.info("Points analytics will be enhanced as more data is collected")
 
-            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
-
-            # Product performance
-            st.subheader("Top Products")
-            if products:
-                top_products = products[:5]
-                for p in top_products:
-                    st.write(f"• {p.get('name')} - ₹{p.get('price')}/{p.get('unit')}")
-            else:
-                st.info("Add products to see analytics")
         else:
-            st.info("📊 Analytics will appear once you have orders")
-
-# Customer Dashboard
+            st.info("📊 Analytics will populate as you add customers and transactions")
 def customer_dashboard():
     st.markdown(f"""
     <div class="dashboard-header">
