@@ -211,7 +211,7 @@ st.set_page_config(
     page_title="LocalKard - The Unified Loyalty & Commerce Network",
     page_icon="💳",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Custom CSS - World-Class Design
@@ -1159,52 +1159,129 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # Add custom sidebar toggle button in main area
+    # Add VERY PROMINENT sidebar toggle button
     st.markdown("""
+    <style>
+    /* Force toggle button visibility */
+    .custom-sidebar-toggle {
+        position: fixed !important;
+        top: 50% !important;
+        left: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 9999999 !important;
+        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+        color: white !important;
+        border: 3px solid white !important;
+        border-left: none !important;
+        border-radius: 0 20px 20px 0 !important;
+        padding: 2rem 1rem !important;
+        font-size: 2rem !important;
+        cursor: pointer !important;
+        box-shadow: 5px 0 30px rgba(99, 102, 241, 0.8) !important;
+        transition: all 0.3s ease !important;
+        font-weight: 900 !important;
+        animation: pulse 2s infinite !important;
+    }
+
+    .custom-sidebar-toggle:hover {
+        padding-right: 1.5rem !important;
+        box-shadow: 8px 0 40px rgba(99, 102, 241, 1) !important;
+        background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+    }
+
+    @keyframes pulse {
+        0%, 100% { box-shadow: 5px 0 30px rgba(99, 102, 241, 0.8); }
+        50% { box-shadow: 5px 0 40px rgba(99, 102, 241, 1); }
+    }
+
+    /* Also add top button */
+    .custom-menu-button {
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        z-index: 9999999 !important;
+        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+        color: white !important;
+        border: 2px solid white !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-size: 1.2rem !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.6) !important;
+        transition: all 0.3s ease !important;
+        font-weight: 700 !important;
+    }
+
+    .custom-menu-button:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 30px rgba(99, 102, 241, 0.9) !important;
+    }
+    </style>
+
     <script>
     function toggleSidebar() {
         const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
         const collapseBtn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
 
         if (sidebar) {
-            // Check if sidebar is collapsed
-            const isCollapsed = sidebar.getAttribute('aria-expanded') === 'false';
+            const currentState = sidebar.getAttribute('aria-expanded');
 
-            if (isCollapsed && collapseBtn) {
-                collapseBtn.click();
+            if (currentState === 'false' || !currentState) {
+                // Sidebar is collapsed, open it
+                if (collapseBtn) {
+                    collapseBtn.click();
+                } else {
+                    sidebar.style.display = 'block';
+                    sidebar.setAttribute('aria-expanded', 'true');
+                }
             } else {
-                // Find and click the close button in sidebar
+                // Sidebar is open, close it
                 const closeBtn = sidebar.querySelector('button[kind="header"]');
                 if (closeBtn) {
                     closeBtn.click();
+                } else {
+                    sidebar.style.display = 'none';
+                    sidebar.setAttribute('aria-expanded', 'false');
                 }
             }
         }
     }
-    </script>
 
-    <button onclick="toggleSidebar()" style="
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 999999;
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.8rem 1.2rem;
-        font-size: 1.2rem;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        transition: all 0.3s ease;
-        font-weight: 600;
-    " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 16px rgba(99, 102, 241, 0.6)';"
-       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.4)';">
-        ☰ Menu
-    </button>
+    // Auto-add buttons after page load
+    setTimeout(function() {
+        if (!document.querySelector('.custom-sidebar-toggle')) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'custom-sidebar-toggle';
+            toggleBtn.innerHTML = '☰';
+            toggleBtn.onclick = toggleSidebar;
+            document.body.appendChild(toggleBtn);
+        }
+
+        if (!document.querySelector('.custom-menu-button')) {
+            const menuBtn = document.createElement('button');
+            menuBtn.className = 'custom-menu-button';
+            menuBtn.innerHTML = '☰ MENU';
+            menuBtn.onclick = toggleSidebar;
+            document.body.appendChild(menuBtn);
+        }
+    }, 1000);
+    </script>
     """, unsafe_allow_html=True)
 
-    # Logout
+    # Prominent Navigation Toggle + Logout
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+                padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;
+                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);'>
+        <div style='color: white; font-size: 1.3rem; font-weight: 700; text-align: center;'>
+            ⬅️ USE THE LEFT SIDEBAR TO NAVIGATE ➡️
+        </div>
+        <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem; text-align: center; margin-top: 0.5rem;'>
+            Click the purple button on the LEFT EDGE to open/close sidebar
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
     with col4:
         if st.button("🚪 Logout", use_container_width=True):
