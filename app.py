@@ -1159,6 +1159,41 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
+    # MAIN NAVIGATION BUTTONS (Always visible alternative to sidebar)
+    st.markdown(f"""
+    <div style='background: white; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;
+                border: 2px solid {MD_COLORS['primary']}; box-shadow: 0 4px 12px rgba(99,102,241,0.3);'>
+        <div style='color: {MD_COLORS['primary']}; font-size: 1.1rem; font-weight: 700; text-align: center; margin-bottom: 1rem;'>
+            📱 NAVIGATION MENU - Click a button to navigate
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 2, 1])
+    with col1:
+        if st.button("🏠 HOME", key="nav_home_btn", use_container_width=True, type="primary"):
+            st.session_state.merchant_menu = "🏠 Home"
+            st.rerun()
+    with col2:
+        if st.button("💎 LOYALTY", key="nav_loyalty_btn", use_container_width=True, type="primary"):
+            st.session_state.merchant_menu = "💎 Loyalty"
+            st.rerun()
+    with col3:
+        if st.button("👥 CUSTOMERS", key="nav_customers_btn", use_container_width=True, type="primary"):
+            st.session_state.merchant_menu = "👥 Customers"
+            st.rerun()
+    with col4:
+        if st.button("📊 ANALYTICS", key="nav_analytics_btn", use_container_width=True, type="primary"):
+            st.session_state.merchant_menu = "📊 Analytics"
+            st.rerun()
+    with col5:
+        if st.button("🚪 Logout", key="nav_logout_btn", use_container_width=True):
+            st.session_state.logged_in = False
+            st.session_state.page = 'landing'
+            st.rerun()
+
+    st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+
     # Add VERY PROMINENT sidebar toggle button
     st.markdown("""
     <style>
