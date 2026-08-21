@@ -211,7 +211,7 @@ st.set_page_config(
     page_title="LocalKard - The Unified Loyalty & Commerce Network",
     page_icon="💳",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # Custom CSS - World-Class Design
@@ -1145,7 +1145,7 @@ def merchant_dashboard():
     </style>
     """, unsafe_allow_html=True)
 
-    # Top Navigation Bar
+    # Top Header (Shop Name Only)
     st.markdown(f"""
     <div style='background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['purple']} 100%);
                 padding: 1.5rem 2rem; border-radius: 16px; margin-bottom: 2rem;
@@ -1159,172 +1159,7 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # MAIN NAVIGATION BUTTONS (Always visible alternative to sidebar)
-    st.markdown(f"""
-    <div style='background: white; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;
-                border: 2px solid {MD_COLORS['primary']}; box-shadow: 0 4px 12px rgba(99,102,241,0.3);'>
-        <div style='color: {MD_COLORS['primary']}; font-size: 1.1rem; font-weight: 700; text-align: center; margin-bottom: 1rem;'>
-            📱 NAVIGATION MENU - Click a button to navigate
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 2, 1])
-    with col1:
-        if st.button("🏠 HOME", key="nav_home_btn", use_container_width=True, type="primary"):
-            st.session_state.merchant_menu = "🏠 Home"
-            st.rerun()
-    with col2:
-        if st.button("💎 LOYALTY", key="nav_loyalty_btn", use_container_width=True, type="primary"):
-            st.session_state.merchant_menu = "💎 Loyalty"
-            st.rerun()
-    with col3:
-        if st.button("👥 CUSTOMERS", key="nav_customers_btn", use_container_width=True, type="primary"):
-            st.session_state.merchant_menu = "👥 Customers"
-            st.rerun()
-    with col4:
-        if st.button("📊 ANALYTICS", key="nav_analytics_btn", use_container_width=True, type="primary"):
-            st.session_state.merchant_menu = "📊 Analytics"
-            st.rerun()
-    with col5:
-        if st.button("🚪 Logout", key="nav_logout_btn", use_container_width=True):
-            st.session_state.logged_in = False
-            st.session_state.page = 'landing'
-            st.rerun()
-
-    st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
-
-    # Add VERY PROMINENT sidebar toggle button
-    st.markdown("""
-    <style>
-    /* Force toggle button visibility */
-    .custom-sidebar-toggle {
-        position: fixed !important;
-        top: 50% !important;
-        left: 0 !important;
-        transform: translateY(-50%) !important;
-        z-index: 9999999 !important;
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
-        color: white !important;
-        border: 3px solid white !important;
-        border-left: none !important;
-        border-radius: 0 20px 20px 0 !important;
-        padding: 2rem 1rem !important;
-        font-size: 2rem !important;
-        cursor: pointer !important;
-        box-shadow: 5px 0 30px rgba(99, 102, 241, 0.8) !important;
-        transition: all 0.3s ease !important;
-        font-weight: 900 !important;
-        animation: pulse 2s infinite !important;
-    }
-
-    .custom-sidebar-toggle:hover {
-        padding-right: 1.5rem !important;
-        box-shadow: 8px 0 40px rgba(99, 102, 241, 1) !important;
-        background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
-    }
-
-    @keyframes pulse {
-        0%, 100% { box-shadow: 5px 0 30px rgba(99, 102, 241, 0.8); }
-        50% { box-shadow: 5px 0 40px rgba(99, 102, 241, 1); }
-    }
-
-    /* Also add top button */
-    .custom-menu-button {
-        position: fixed !important;
-        top: 1rem !important;
-        left: 1rem !important;
-        z-index: 9999999 !important;
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
-        color: white !important;
-        border: 2px solid white !important;
-        border-radius: 12px !important;
-        padding: 1rem 1.5rem !important;
-        font-size: 1.2rem !important;
-        cursor: pointer !important;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.6) !important;
-        transition: all 0.3s ease !important;
-        font-weight: 700 !important;
-    }
-
-    .custom-menu-button:hover {
-        transform: scale(1.1) !important;
-        box-shadow: 0 6px 30px rgba(99, 102, 241, 0.9) !important;
-    }
-    </style>
-
-    <script>
-    function toggleSidebar() {
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-        const collapseBtn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
-
-        if (sidebar) {
-            const currentState = sidebar.getAttribute('aria-expanded');
-
-            if (currentState === 'false' || !currentState) {
-                // Sidebar is collapsed, open it
-                if (collapseBtn) {
-                    collapseBtn.click();
-                } else {
-                    sidebar.style.display = 'block';
-                    sidebar.setAttribute('aria-expanded', 'true');
-                }
-            } else {
-                // Sidebar is open, close it
-                const closeBtn = sidebar.querySelector('button[kind="header"]');
-                if (closeBtn) {
-                    closeBtn.click();
-                } else {
-                    sidebar.style.display = 'none';
-                    sidebar.setAttribute('aria-expanded', 'false');
-                }
-            }
-        }
-    }
-
-    // Auto-add buttons after page load
-    setTimeout(function() {
-        if (!document.querySelector('.custom-sidebar-toggle')) {
-            const toggleBtn = document.createElement('button');
-            toggleBtn.className = 'custom-sidebar-toggle';
-            toggleBtn.innerHTML = '☰';
-            toggleBtn.onclick = toggleSidebar;
-            document.body.appendChild(toggleBtn);
-        }
-
-        if (!document.querySelector('.custom-menu-button')) {
-            const menuBtn = document.createElement('button');
-            menuBtn.className = 'custom-menu-button';
-            menuBtn.innerHTML = '☰ MENU';
-            menuBtn.onclick = toggleSidebar;
-            document.body.appendChild(menuBtn);
-        }
-    }, 1000);
-    </script>
-    """, unsafe_allow_html=True)
-
-    # Prominent Navigation Toggle + Logout
-    st.markdown("""
-    <div style='background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-                padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;
-                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);'>
-        <div style='color: white; font-size: 1.3rem; font-weight: 700; text-align: center;'>
-            ⬅️ USE THE LEFT SIDEBAR TO NAVIGATE ➡️
-        </div>
-        <div style='color: rgba(255,255,255,0.9); font-size: 0.9rem; text-align: center; margin-top: 0.5rem;'>
-            Click the purple button on the LEFT EDGE to open/close sidebar
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
-    with col4:
-        if st.button("🚪 Logout", use_container_width=True):
-            st.session_state.logged_in = False
-            st.session_state.page = 'landing'
-            st.rerun()
-
-    st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
 
     # Sidebar
     st.sidebar.markdown(f"""
@@ -1335,24 +1170,16 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # Sidebar collapse tip
-    st.sidebar.markdown("""
-    <div style='background: rgba(99, 102, 241, 0.1); border-left: 3px solid #6366F1;
-                padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem;'>
-        <div style='font-size: 0.75rem; color: #6366F1; font-weight: 600;'>
-            💡 TIP: Click the [×] icon at the top or use the arrow button on the left edge to collapse this sidebar
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Sidebar Navigation Menu
+    menu = st.sidebar.radio("📋 Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"], label_visibility="visible")
 
-    # Check if menu selection from main area buttons
-    if 'merchant_menu' not in st.session_state:
-        st.session_state.merchant_menu = "🏠 Home"
+    st.sidebar.markdown("<div style='margin: 2rem 0; border-top: 1px solid #E5E7EB;'></div>", unsafe_allow_html=True)
 
-    menu = st.sidebar.radio("Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"],
-                           key="sidebar_menu",
-                           index=["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"].index(st.session_state.merchant_menu) if st.session_state.merchant_menu in ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"] else 0,
-                           label_visibility="visible")
+    # Logout button in sidebar (ONLY ONE)
+    if st.sidebar.button("🚪 Logout", use_container_width=True, type="primary"):
+        st.session_state.logged_in = False
+        st.session_state.page = 'landing'
+        st.rerun()
 
     # Load data
     customers = md_load_customers(merchant_phone)
