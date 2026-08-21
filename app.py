@@ -477,28 +477,12 @@ CUSTOMERS = {
 
 # Landing Page
 def landing_page():
-    # Hero Section with fixed HTML rendering
+    # Hero Section
     st.markdown("""
-    <div style="text-align: center; padding: 3rem 2rem 1rem 2rem;">
+    <div style="text-align: center; padding: 3rem 2rem 2rem 2rem;">
         <div class="coming-soon-badge">🚀 Coming Soon</div>
         <div class="brand">LocalKard</div>
         <div class="tagline">The Unified Loyalty & Commerce Network</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Swipe indicator - separate to ensure proper rendering
-    st.markdown("""
-    <div class="swipe-container">
-        <div class="swipe-text">Swipe to Login</div>
-        <div class="swipe-indicator">
-            <span class="swipe-arrow">◂</span>
-            <span class="swipe-arrow">◂</span>
-            <span class="swipe-arrow">◂</span>
-            <div class="swipe-line"></div>
-            <span class="swipe-arrow right">▸</span>
-            <span class="swipe-arrow right">▸</span>
-            <span class="swipe-arrow right">▸</span>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -532,7 +516,7 @@ def landing_page():
                 st.session_state.page = 'customer_login'
                 st.rerun()
 
-    # About Us Section
+    # About Us Section - Header and description
     st.markdown("""
     <div class="about-section">
         <div class="about-title">About LocalKard</div>
@@ -547,7 +531,10 @@ def landing_page():
             personal relationships that make local commerce special. From your corner grocery
             store to your favorite pet shop, LocalKard brings them all together in one network.
         </div>
+    """, unsafe_allow_html=True)
 
+    # Feature list - separate for proper rendering
+    st.markdown("""
         <div class="feature-list">
             <div class="feature-item">
                 <div class="feature-icon">📱</div>
