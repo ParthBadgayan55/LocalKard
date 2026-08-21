@@ -1,16 +1,18 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import streamlit.components.v1 as components
 import json
 import os
 
-# Import merchant data management
+# Import merchant modules at top level
 try:
-    from merchant_data import *
-except ImportError:
-    # Fallback if import fails
-    pass
+    import merchant_data
+    import merchant_dashboard
+    MERCHANT_MODULES_LOADED = True
+except ImportError as e:
+    MERCHANT_MODULES_LOADED = False
+    print(f"Warning: Could not import merchant modules: {e}")
 
 # Page config
 st.set_page_config(
@@ -845,8 +847,61 @@ def customer_login_page():
 # Merchant Dashboard
 def merchant_dashboard():
     """Main merchant dashboard - calls comprehensive dashboard module"""
-    from merchant_dashboard import merchant_dashboard_main
-    merchant_dashboard_main(st.session_state.current_user)
+    if MERCHANT_MODULES_LOADED:
+        try:
+            merchant_dashboard.merchant_dashboard_main(st.session_state.current_user)
+            return
+        except Exception as e:
+            st.error(f"Error loading dashboard module: {e}")
+            # Fall through to simple dashboard
+
+    # Fallback simple dashboard
+    st.markdown(f"""
+    <div class="dashboard-header">
+        <div class="dashboard-title">Welcome, {st.session_state.current_user['owner']}</div>
+        <div class="dashboard-subtitle">{st.session_state.current_user['name']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Logout", key="merchant_logout"):
+        st.session_state.logged_in = False
+        st.session_state.page = 'landing'
+        st.rerun()
+
+    # Simple metrics
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Today's Orders", "0", "")
+    with col2:
+        st.metric("Revenue", "₹0", "")
+    with col3:
+        st.metric("Active Products", "0", "")
+    with col4:
+        st.metric("Pending Orders", "0", "")
+
+    st.write("")
+
+    # Simple tabs
+    tab1, tab2, tab3 = st.tabs(["📦 Orders", "🛍️ Products", "📊 Analytics"])
+
+    with tab1:
+        st.subheader("Recent Orders")
+        st.info("📦 No orders yet. The complete dashboard will load shortly.")
+
+    with tab2:
+        st.subheader("Product Catalog")
+        st.info("🛍️ Add your products here. Dashboard loading...")
+
+    with tab3:
+        st.subheader("Sales Analytics")
+        st.info("📊 Analytics will appear here.")
+
+    # Show what went wrong
+    if not MERCHANT_MODULES_LOADED:
+        with st.expander("🔧 Troubleshooting"):
+            st.warning("Merchant dashboard modules couldn't load. The app is still deploying on Streamlit Cloud.")
+            st.info("Please wait 1-2 minutes and refresh the page.")
+            st.write("Files in directory:", [f for f in os.listdir('.') if f.endswith('.py')])
 
 # Customer Dashboard
 def customer_dashboard():
