@@ -458,18 +458,33 @@ MERCHANTS = {
         "owner": "LocalKard Admin",
         "password": "LocalKard@55",
         "phone": "LocalKard",
+        "address": "MG Road, Bangalore",
+        "locality": "MG Road",
+        "pincode": "560001",
+        "latitude": 12.9716,
+        "longitude": 77.5946,
     },
     "9876543210": {
         "name": "Fresh Mart Grocery",
         "owner": "Rajesh Kumar",
         "password": "merchant123",
         "phone": "9876543210",
+        "address": "123 Main Street, Mumbai",
+        "locality": "Andheri West",
+        "pincode": "400053",
+        "latitude": 19.1136,
+        "longitude": 72.8697,
     },
     "9876543211": {
         "name": "Pet Paradise",
         "owner": "Priya Sharma",
         "password": "merchant123",
         "phone": "9876543211",
+        "address": "456 Park Road, Mumbai",
+        "locality": "Bandra",
+        "pincode": "400050",
+        "latitude": 19.0596,
+        "longitude": 72.8295,
     }
 }
 
@@ -787,34 +802,74 @@ def customer_dashboard():
 def merchant_signup_page():
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1.2, 1, 1.2])
+    col1, col2, col3 = st.columns([1, 1.2, 1])
 
     with col2:
-        st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
+        st.markdown('<div class="login-form-container" style="max-width: 520px;">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Merchant Signup</div>', unsafe_allow_html=True)
 
+        # Basic Info
         shop_name = st.text_input("Shop Name", placeholder="Enter your shop name", key="signup_shop_name")
         owner_name = st.text_input("Owner Name", placeholder="Enter your name", key="signup_owner_name")
         phone = st.text_input("Phone Number", placeholder="Enter your phone", key="signup_phone")
+
+        # Address Info
+        st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">📍 Shop Location</div>', unsafe_allow_html=True)
+
+        col_addr1, col_addr2 = st.columns(2)
+        with col_addr1:
+            locality = st.text_input("Locality", placeholder="e.g., Andheri West", key="signup_locality")
+        with col_addr2:
+            pincode = st.text_input("Pincode", placeholder="e.g., 400053", key="signup_pincode")
+
+        address = st.text_input("Full Address", placeholder="Street address", key="signup_address")
+
+        # Geo-location
+        st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">🗺️ Geo-Location</div>', unsafe_allow_html=True)
+
+        use_current = st.checkbox("📍 Use Current Location", key="use_current_location")
+
+        col_geo1, col_geo2 = st.columns(2)
+        with col_geo1:
+            if use_current:
+                latitude = st.number_input("Latitude", value=19.0760, format="%.6f", key="signup_latitude", disabled=True)
+            else:
+                latitude = st.number_input("Latitude", value=19.0760, format="%.6f", key="signup_latitude")
+        with col_geo2:
+            if use_current:
+                longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude", disabled=True)
+            else:
+                longitude = st.number_input("Longitude", value=72.8777, format="%.6f", key="signup_longitude")
+
+        if use_current:
+            st.info("📍 Using default Mumbai coordinates. In production, this would fetch your actual location.")
+
+        # Password
+        st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
         password = st.text_input("Password", type="password", placeholder="Create a password", key="signup_password")
         confirm_password = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="signup_confirm_password")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
         if st.button("Create Account", key="merchant_signup_btn", use_container_width=True):
-            if not all([shop_name, owner_name, phone, password, confirm_password]):
+            if not all([shop_name, owner_name, phone, locality, pincode, address, password, confirm_password]):
                 st.error("Please fill all fields")
             elif password != confirm_password:
                 st.error("Passwords do not match")
             elif phone in MERCHANTS:
                 st.error("Account already exists")
             else:
-                # Add new merchant (in real app, this would save to database)
+                # Add new merchant with location
                 MERCHANTS[phone] = {
                     "name": shop_name,
                     "owner": owner_name,
                     "password": password,
                     "phone": phone,
+                    "address": address,
+                    "locality": locality,
+                    "pincode": pincode,
+                    "latitude": latitude,
+                    "longitude": longitude,
                 }
                 st.success("Account created successfully!")
                 st.session_state.page = 'merchant_login'
@@ -873,12 +928,29 @@ def customer_signup_page():
 
 # Discover Shops
 def discover_page():
+    import math
+
+    # Function to calculate distance between two coordinates (Haversine formula)
+    def calculate_distance(lat1, lon1, lat2, lon2):
+        R = 6371  # Earth's radius in km
+
+        lat1_rad = math.radians(lat1)
+        lat2_rad = math.radians(lat2)
+        delta_lat = math.radians(lat2 - lat1)
+        delta_lon = math.radians(lon2 - lon1)
+
+        a = math.sin(delta_lat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon/2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+        distance = R * c
+        return distance
+
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class="dashboard-header">
         <div class="dashboard-title">Discover Shops</div>
-        <div class="dashboard-subtitle">Browse all onboarded merchants in the LocalKard network</div>
+        <div class="dashboard-subtitle">Find merchants near you in the LocalKard network</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -886,37 +958,129 @@ def discover_page():
         st.session_state.page = 'landing'
         st.rerun()
 
-    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
-    # Display all merchants
+    # Location controls
     col1, col2, col3 = st.columns([0.5, 3, 0.5])
 
     with col2:
-        st.markdown('<div class="about-section">', unsafe_allow_html=True)
+        st.markdown('<div class="about-section" style="padding: 1.5rem;">', unsafe_allow_html=True)
 
-        for phone, merchant in MERCHANTS.items():
-            st.markdown(f"""
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="color: #ffffff; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem;">
-                            🏪 {merchant['name']}
-                        </div>
-                        <div style="color: #a0a0c0; font-size: 0.95rem;">
-                            Owner: {merchant['owner']}
-                        </div>
-                        <div style="color: #667eea; font-size: 0.9rem; margin-top: 0.3rem;">
-                            📞 {phone}
-                        </div>
-                    </div>
-                    <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1.5rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                        Active
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">📍 Your Location</div>', unsafe_allow_html=True)
+
+        use_live = st.checkbox("📍 Use Current Location", value=True, key="use_live_location")
+
+        col_loc1, col_loc2 = st.columns(2)
+        with col_loc1:
+            if use_live:
+                user_lat = 19.0760  # Default Mumbai coordinates
+                st.text_input("Latitude", value=f"{user_lat:.6f}", disabled=True, key="discover_lat_display")
+            else:
+                user_lat = st.number_input("Latitude", value=19.0760, format="%.6f", key="discover_lat")
+
+        with col_loc2:
+            if use_live:
+                user_lon = 72.8777  # Default Mumbai coordinates
+                st.text_input("Longitude", value=f"{user_lon:.6f}", disabled=True, key="discover_lon_display")
+            else:
+                user_lon = st.number_input("Longitude", value=72.8777, format="%.6f", key="discover_lon")
+
+        if use_live:
+            st.info("📍 Using Mumbai city center. In production, this would use your actual GPS location.")
+
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
+        # Distance slider
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">🎯 Distance Range</div>', unsafe_allow_html=True)
+
+        # Slider with logarithmic-style options
+        distance_options = {
+            "20 meters": 0.02,
+            "50 meters": 0.05,
+            "100 meters": 0.1,
+            "500 meters": 0.5,
+            "1 km": 1,
+            "5 km": 5,
+            "10 km": 10,
+            "25 km": 25,
+            "50 km": 50,
+            "100 km": 100
+        }
+
+        selected_distance_label = st.select_slider(
+            "Filter shops within",
+            options=list(distance_options.keys()),
+            value="10 km",
+            key="distance_slider"
+        )
+
+        max_distance = distance_options[selected_distance_label]
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+
+    # Calculate distances and filter merchants
+    merchant_distances = []
+    for phone, merchant in MERCHANTS.items():
+        if 'latitude' in merchant and 'longitude' in merchant:
+            distance = calculate_distance(user_lat, user_lon, merchant['latitude'], merchant['longitude'])
+            if distance <= max_distance:
+                merchant_distances.append((phone, merchant, distance))
+
+    # Sort by distance
+    merchant_distances.sort(key=lambda x: x[2])
+
+    # Display filtered merchants
+    col1, col2, col3 = st.columns([0.5, 3, 0.5])
+
+    with col2:
+        if not merchant_distances:
+            st.markdown("""
+            <div class="about-section" style="text-align: center; padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <div style="color: #a0a0c0; font-size: 1.1rem;">No shops found within {max_distance} km</div>
+                <div style="color: #808090; font-size: 0.9rem; margin-top: 0.5rem;">Try increasing the distance range</div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div style="color: #a0a0c0; font-size: 0.9rem; margin-bottom: 1rem; text-align: center;">Found {len(merchant_distances)} shop(s) within {selected_distance_label}</div>', unsafe_allow_html=True)
+
+            for phone, merchant, distance in merchant_distances:
+                # Format distance
+                if distance < 1:
+                    distance_str = f"{distance * 1000:.0f}m"
+                else:
+                    distance_str = f"{distance:.1f}km"
+
+                st.markdown(f"""
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="color: #ffffff; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                🏪 {merchant['name']}
+                            </div>
+                            <div style="color: #a0a0c0; font-size: 0.95rem; margin-bottom: 0.3rem;">
+                                👤 {merchant['owner']}
+                            </div>
+                            <div style="color: #667eea; font-size: 0.9rem; margin-bottom: 0.3rem;">
+                                📞 {phone}
+                            </div>
+                            <div style="color: #a0a0c0; font-size: 0.85rem;">
+                                📍 {merchant.get('locality', 'N/A')} - {merchant.get('pincode', 'N/A')}
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                            <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                📍 {distance_str}
+                            </div>
+                            <div style="background: rgba(102, 234, 144, 0.2); border: 1px solid rgba(102, 234, 144, 0.5); color: #66ea90; padding: 0.4rem 1rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500;">
+                                Active
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # Router
 if st.session_state.page == 'landing':
