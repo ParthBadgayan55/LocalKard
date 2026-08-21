@@ -33,7 +33,7 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         min-height: 100vh;
         text-align: center;
         padding: 2rem;
@@ -41,23 +41,22 @@ st.markdown("""
 
     /* Logo/Brand */
     .brand {
-        font-size: 4rem;
+        font-size: 4.5rem;
         font-weight: 800;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
         letter-spacing: -2px;
-        text-transform: uppercase;
     }
 
     .tagline {
         color: #a0a0c0;
         font-size: 1.2rem;
         font-weight: 300;
-        margin-bottom: 4rem;
-        letter-spacing: 2px;
+        margin-bottom: 5rem;
+        letter-spacing: 1px;
     }
 
     /* Login cards */
@@ -75,7 +74,9 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         padding: 3rem 2.5rem;
-        width: 350px;
+        width: 100%;
+        max-width: 380px;
+        margin: 0 auto;
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -289,17 +290,22 @@ CUSTOMERS = {
 
 # Landing Page
 def landing_page():
+    # Header section
     st.markdown("""
-    <div class="landing-container">
+    <div style="text-align: center; padding: 4rem 2rem 2rem 2rem;">
         <div class="brand">LocalKard</div>
-        <div class="tagline">Your Digital Commerce Companion</div>
+        <div class="tagline">The Unified Loyalty & Commerce Network</div>
     </div>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Spacing
+    st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+
+    # Login cards section
+    col1, col2, col3 = st.columns([1, 3, 1])
 
     with col2:
-        c1, c2 = st.columns(2)
+        c1, c2 = st.columns(2, gap="large")
 
         with c1:
             st.markdown("""
