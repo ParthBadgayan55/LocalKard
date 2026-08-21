@@ -1161,17 +1161,8 @@ def merchant_dashboard():
 
 
 
-    # Sidebar
-    st.sidebar.markdown(f"""
-    <div style='padding: 1.5rem; background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['purple']} 100%);
-                border-radius: 12px; margin-bottom: 1.5rem;'>
-        <div style='color: white; font-size: 1.1rem; font-weight: 700;'>🎯 Loyalty Dashboard</div>
-        <div style='color: rgba(255,255,255,0.85); font-size: 0.75rem; margin-top: 0.3rem;'>World-Class System</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Sidebar Navigation Menu
-    menu = st.sidebar.radio("📋 Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"], label_visibility="visible")
+    # Sidebar Navigation Menu (Simple and clean)
+    menu = st.sidebar.radio("Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"], label_visibility="collapsed")
 
     st.sidebar.markdown("<div style='margin: 2rem 0; border-top: 1px solid #E5E7EB;'></div>", unsafe_allow_html=True)
 
