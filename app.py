@@ -4,13 +4,13 @@ from datetime import datetime, timedelta
 
 # Page config
 st.set_page_config(
-    page_title="LocalKard",
+    page_title="LocalKard - The Unified Loyalty & Commerce Network",
     page_icon="💳",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS - Sleek, Futuristic Design
+# Custom CSS - World-Class Design
 st.markdown("""
 <style>
     /* Hide Streamlit branding */
@@ -28,41 +28,55 @@ st.markdown("""
         background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
     }
 
-    /* Landing page container */
-    .landing-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        min-height: 100vh;
-        text-align: center;
-        padding: 2rem;
-    }
-
     /* Logo/Brand */
     .brand {
-        font-size: 3.5rem;
+        font-size: 4rem;
         font-weight: 800;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 0.8rem;
+        margin-bottom: 1rem;
         letter-spacing: -2px;
     }
 
     .tagline {
         color: #a0a0c0;
-        font-size: 1rem;
+        font-size: 1.2rem;
         font-weight: 300;
-        margin-bottom: 0;
+        margin-bottom: 1.5rem;
         letter-spacing: 1px;
+    }
+
+    /* Coming Soon Badge */
+    .coming-soon-badge {
+        display: inline-block;
+        background: rgba(102, 126, 234, 0.2);
+        border: 1px solid rgba(102, 126, 234, 0.5);
+        color: #667eea;
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 2rem;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+        0%, 100% {
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
     }
 
     /* Swipe to Login */
     .swipe-container {
-        margin-top: 2rem;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -126,14 +140,6 @@ st.markdown("""
     }
 
     /* Login cards */
-    .login-cards {
-        display: flex;
-        gap: 3rem;
-        margin-top: 2rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
     .login-card {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -176,6 +182,94 @@ st.markdown("""
         font-size: 0.9rem;
         line-height: 1.5;
         text-align: center;
+    }
+
+    /* About Us Section */
+    .about-section {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin: 3rem auto 2rem auto;
+        max-width: 900px;
+    }
+
+    .about-title {
+        color: #ffffff;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .about-content {
+        color: #b0b0d0;
+        font-size: 1rem;
+        line-height: 1.8;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .feature-item {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .feature-title {
+        color: #ffffff;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+        color: #a0a0c0;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    /* Footer */
+    .footer {
+        background: rgba(0, 0, 0, 0.3);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .footer-content {
+        color: #808090;
+        font-size: 0.9rem;
+        line-height: 1.8;
+    }
+
+    .footer-brand {
+        color: #667eea;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .copyright {
+        color: #606070;
+        font-size: 0.85rem;
+        margin-top: 1rem;
     }
 
     /* Login form */
@@ -232,20 +326,6 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
     }
 
-    /* Back button */
-    .back-link {
-        color: #667eea;
-        text-align: center;
-        margin-top: 1.5rem;
-        cursor: pointer;
-        font-size: 0.95rem;
-    }
-
-    .back-link:hover {
-        color: #764ba2;
-        text-decoration: underline;
-    }
-
     /* Labels */
     .stTextInput > label {
         color: #a0a0c0 !important;
@@ -292,12 +372,6 @@ st.markdown("""
     .stMetric [data-testid="stMetricValue"] {
         color: #ffffff !important;
         font-size: 2rem !important;
-    }
-
-    /* Dataframes */
-    .dataframe {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: #ffffff !important;
     }
 
     /* Tabs */
@@ -362,30 +436,29 @@ CUSTOMERS = {
 
 # Landing Page
 def landing_page():
-    # Single page layout - everything fits in viewport
+    # Hero Section
     st.markdown("""
-    <div style="display: flex; flex-direction: column; min-height: 100vh; justify-content: center; align-items: center; padding: 2rem;">
-        <div style="text-align: center; margin-bottom: 2.5rem;">
-            <div class="brand">LocalKard</div>
-            <div class="tagline">The Unified Loyalty & Commerce Network</div>
+    <div style="text-align: center; padding: 3rem 2rem 1rem 2rem;">
+        <div class="coming-soon-badge">🚀 Coming Soon</div>
+        <div class="brand">LocalKard</div>
+        <div class="tagline">The Unified Loyalty & Commerce Network</div>
 
-            <div class="swipe-container">
-                <div class="swipe-text">Swipe to Login</div>
-                <div class="swipe-indicator">
-                    <span class="swipe-arrow">‹</span>
-                    <span class="swipe-arrow">‹</span>
-                    <span class="swipe-arrow">‹</span>
-                    <div class="swipe-line"></div>
-                    <span class="swipe-arrow">›</span>
-                    <span class="swipe-arrow">›</span>
-                    <span class="swipe-arrow">›</span>
-                </div>
+        <div class="swipe-container">
+            <div class="swipe-text">Swipe to Login</div>
+            <div class="swipe-indicator">
+                <span class="swipe-arrow">‹</span>
+                <span class="swipe-arrow">‹</span>
+                <span class="swipe-arrow">‹</span>
+                <div class="swipe-line"></div>
+                <span class="swipe-arrow">›</span>
+                <span class="swipe-arrow">›</span>
+                <span class="swipe-arrow">›</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Login cards section - centered
+    # Login Cards
     col1, col2, col3 = st.columns([1, 2.5, 1])
 
     with col2:
@@ -415,6 +488,60 @@ def landing_page():
                 st.session_state.page = 'customer_login'
                 st.rerun()
 
+    # About Us Section
+    st.markdown("""
+    <div class="about-section">
+        <div class="about-title">About LocalKard</div>
+        <div class="about-content">
+            LocalKard is revolutionizing local commerce in India's Tier 2 and Tier 3 towns.
+            We're building a unified loyalty and commerce network that connects neighborhood shops
+            with their customers through WhatsApp, enabling seamless ordering, automated reorder
+            reminders, and cross-shop loyalty rewards.
+        </div>
+        <div class="about-content">
+            Our vision is to empower local retailers with digital tools while preserving the
+            personal relationships that make local commerce special. From your corner grocery
+            store to your favorite pet shop, LocalKard brings them all together in one network.
+        </div>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title">WhatsApp Native</div>
+                <div class="feature-description">Order from local shops via WhatsApp - no app download needed</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔔</div>
+                <div class="feature-title">Smart Reminders</div>
+                <div class="feature-description">Never run out - get automatic reorder reminders</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🏪</div>
+                <div class="feature-title">Shop Discovery</div>
+                <div class="feature-description">Discover nearby shops and explore new products</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💳</div>
+                <div class="feature-title">Unified Loyalty</div>
+                <div class="feature-description">Earn and redeem points across all participating shops</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Footer
+    st.markdown("""
+    <div class="footer">
+        <div class="footer-brand">LocalKard</div>
+        <div class="footer-content">
+            Empowering local commerce in Tier 2 & Tier 3 India
+        </div>
+        <div class="copyright">
+            © 2026 LocalKard. All rights reserved.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 # Merchant Login
 def merchant_login_page():
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -437,16 +564,14 @@ def merchant_login_page():
             else:
                 st.error("Invalid credentials")
 
-        st.markdown('<div class="back-link">', unsafe_allow_html=True)
-        if st.button("← Back to Home", key="back_merchant"):
+        if st.button("← Back to Home", key="back_merchant", use_container_width=True):
             st.session_state.page = 'landing'
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Demo credentials
-        st.info("Demo: 9876543210 / merchant123")
+        st.info("📱 Demo: 9876543210 / merchant123")
 
 # Customer Login
 def customer_login_page():
@@ -470,16 +595,14 @@ def customer_login_page():
             else:
                 st.error("Invalid credentials")
 
-        st.markdown('<div class="back-link">', unsafe_allow_html=True)
-        if st.button("← Back to Home", key="back_customer"):
+        if st.button("← Back to Home", key="back_customer", use_container_width=True):
             st.session_state.page = 'landing'
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Demo credentials
-        st.info("Demo: 9988776655 / customer123")
+        st.info("📱 Demo: 9988776655 / customer123")
 
 # Merchant Dashboard
 def merchant_dashboard():
@@ -508,7 +631,7 @@ def merchant_dashboard():
 
     st.write("")
 
-    # Tabs for different sections
+    # Tabs
     tab1, tab2, tab3 = st.tabs(["📦 Orders", "🛍️ Products", "📊 Analytics"])
 
     with tab1:
