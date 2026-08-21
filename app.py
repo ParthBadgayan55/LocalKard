@@ -308,30 +308,34 @@ st.markdown("""
 
     /* Input fields */
     .stTextInput > div > div > input {
-        background: rgba(255, 255, 255, 0.12) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 12px !important;
-        color: #ffffff !important;
+        color: #000000 !important;
         padding: 1rem 1.2rem !important;
         font-size: 0.95rem !important;
         transition: all 0.3s ease !important;
     }
 
     .stTextInput > div > div > input::placeholder {
-        color: rgba(255, 255, 255, 0.4) !important;
+        color: rgba(0, 0, 0, 0.4) !important;
         font-weight: 400 !important;
     }
 
     .stTextInput > div > div > input:focus {
         border-color: #667eea !important;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
-        background: rgba(255, 255, 255, 0.18) !important;
+        background: rgba(255, 255, 255, 1) !important;
         outline: none !important;
     }
 
-    /* Hide labels */
+    /* Show labels */
     .stTextInput > label {
-        display: none !important;
+        color: #ffffff !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        margin-bottom: 0.5rem !important;
+        letter-spacing: 0.3px !important;
     }
 
     /* Buttons */
@@ -595,9 +599,8 @@ def merchant_login_page():
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Merchant Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Username", placeholder="Enter username", key="merchant_phone", label_visibility="collapsed")
-        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-        password = st.text_input("Password", type="password", placeholder="Enter password", key="merchant_pass", label_visibility="collapsed")
+        phone = st.text_input("Username", placeholder="Enter your username", key="merchant_phone")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="merchant_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
@@ -629,9 +632,8 @@ def customer_login_page():
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Customer Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Username", placeholder="Enter username", key="customer_phone", label_visibility="collapsed")
-        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-        password = st.text_input("Password", type="password", placeholder="Enter password", key="customer_pass", label_visibility="collapsed")
+        phone = st.text_input("Username", placeholder="Enter your username", key="customer_phone")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="customer_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
