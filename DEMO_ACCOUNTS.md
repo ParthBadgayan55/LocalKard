@@ -28,6 +28,12 @@
 - Location: Mumbai, Bandra
 - Shop: Pet Paradise
 
+**5. Demo Shop 3**
+- Username: `demoshop3`
+- Password: `demoshop3`
+- Location: Mumbai, Powai
+- Shop: Demo Shop 3
+
 ---
 
 ### 👤 Customer Accounts
