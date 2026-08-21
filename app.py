@@ -99,8 +99,9 @@ st.markdown("""
 
     .swipe-arrow {
         color: #667eea;
-        font-size: 1.2rem;
+        font-size: 1.5rem;
         animation: swipeLeft 2s ease-in-out infinite;
+        display: inline-block;
     }
 
     .swipe-arrow:nth-child(2) {
@@ -108,6 +109,18 @@ st.markdown("""
     }
 
     .swipe-arrow:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    .swipe-arrow.right {
+        animation-delay: 0s;
+    }
+
+    .swipe-arrow.right:nth-child(5) {
+        animation-delay: 0.2s;
+    }
+
+    .swipe-arrow.right:nth-child(6) {
         animation-delay: 0.4s;
     }
 
@@ -274,37 +287,54 @@ st.markdown("""
 
     /* Login form */
     .login-form-container {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 3rem;
-        max-width: 450px;
-        margin: 2rem auto;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 25px;
+        padding: 3.5rem 3rem;
+        max-width: 480px;
+        margin: 3rem auto;
+        box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.5);
     }
 
     .form-title {
         color: #ffffff;
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 2rem;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 2.5rem;
         text-align: center;
+        background: linear-gradient(90deg, #ffffff 0%, #c7c7ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .login-subtitle {
+        color: #a0a0c0;
+        font-size: 0.95rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 0.5px;
     }
 
     /* Input fields */
     .stTextInput > div > div > input {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        color: #ffffff;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 10px !important;
+        color: #ffffff !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
+    }
+
+    .stTextInput > div > div > input::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
     }
 
     .stTextInput > div > div > input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
     }
 
     /* Buttons */
@@ -447,24 +477,27 @@ CUSTOMERS = {
 
 # Landing Page
 def landing_page():
-    # Hero Section
+    # Hero Section with fixed HTML rendering
     st.markdown("""
     <div style="text-align: center; padding: 3rem 2rem 1rem 2rem;">
         <div class="coming-soon-badge">🚀 Coming Soon</div>
         <div class="brand">LocalKard</div>
         <div class="tagline">The Unified Loyalty & Commerce Network</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        <div class="swipe-container">
-            <div class="swipe-text">Swipe to Login</div>
-            <div class="swipe-indicator">
-                <span class="swipe-arrow">‹</span>
-                <span class="swipe-arrow">‹</span>
-                <span class="swipe-arrow">‹</span>
-                <div class="swipe-line"></div>
-                <span class="swipe-arrow">›</span>
-                <span class="swipe-arrow">›</span>
-                <span class="swipe-arrow">›</span>
-            </div>
+    # Swipe indicator - separate to ensure proper rendering
+    st.markdown("""
+    <div class="swipe-container">
+        <div class="swipe-text">Swipe to Login</div>
+        <div class="swipe-indicator">
+            <span class="swipe-arrow">◂</span>
+            <span class="swipe-arrow">◂</span>
+            <span class="swipe-arrow">◂</span>
+            <div class="swipe-line"></div>
+            <span class="swipe-arrow right">▸</span>
+            <span class="swipe-arrow right">▸</span>
+            <span class="swipe-arrow right">▸</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -555,25 +588,29 @@ def landing_page():
 
 # Merchant Login
 def merchant_login_page():
+    # Add spacing
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col2:
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
-        st.markdown('<div class="form-title">🏪 Merchant Login</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">🏪 Merchant Portal</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-subtitle">Access your store dashboard</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="merchant_phone")
-        password = st.text_input("Password", type="password", placeholder="Enter password", key="merchant_pass")
+        phone = st.text_input("Phone Number / Username", placeholder="Enter your phone or username", key="merchant_phone")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="merchant_pass")
 
-        if st.button("Login", key="merchant_login_btn"):
+        if st.button("Sign In", key="merchant_login_btn"):
             if phone in MERCHANTS and MERCHANTS[phone]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'merchant'
                 st.session_state.current_user = MERCHANTS[phone]
                 st.session_state.page = 'merchant_dashboard'
-                st.success("Login successful!")
+                st.success("✓ Login successful!")
                 st.rerun()
             else:
-                st.error("Invalid credentials")
+                st.error("✗ Invalid credentials. Please try again.")
 
         if st.button("← Back to Home", key="back_merchant", use_container_width=True):
             st.session_state.page = 'landing'
@@ -582,29 +619,34 @@ def merchant_login_page():
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Demo credentials
-        st.info("🔑 Login: **LocalKard** | Password: **LocalKard@55**")
+        st.markdown("<div style='text-align: center; margin-top: 1rem;'></div>", unsafe_allow_html=True)
+        st.info("🔑 Demo Login: **LocalKard** • Password: **LocalKard@55**")
 
 # Customer Login
 def customer_login_page():
+    # Add spacing
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_handle_html=True)
+
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col2:
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
-        st.markdown('<div class="form-title">👤 Customer Login</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">👤 Customer Portal</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-subtitle">Browse and order from local shops</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="customer_phone")
-        password = st.text_input("Password", type="password", placeholder="Enter password", key="customer_pass")
+        phone = st.text_input("Phone Number / Username", placeholder="Enter your phone or username", key="customer_phone")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="customer_pass")
 
-        if st.button("Login", key="customer_login_btn"):
+        if st.button("Sign In", key="customer_login_btn"):
             if phone in CUSTOMERS and CUSTOMERS[phone]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'customer'
                 st.session_state.current_user = CUSTOMERS[phone]
                 st.session_state.page = 'customer_dashboard'
-                st.success("Login successful!")
+                st.success("✓ Login successful!")
                 st.rerun()
             else:
-                st.error("Invalid credentials")
+                st.error("✗ Invalid credentials. Please try again.")
 
         if st.button("← Back to Home", key="back_customer", use_container_width=True):
             st.session_state.page = 'landing'
@@ -613,7 +655,8 @@ def customer_login_page():
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Demo credentials
-        st.info("🔑 Login: **LocalKard** | Password: **LocalKard@55**")
+        st.markdown("<div style='text-align: center; margin-top: 1rem;'></div>", unsafe_allow_html=True)
+        st.info("🔑 Demo Login: **LocalKard** • Password: **LocalKard@55**")
 
 # Merchant Dashboard
 def merchant_dashboard():
