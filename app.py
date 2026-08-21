@@ -98,7 +98,7 @@ st.set_page_config(
     page_title="LocalKard - The Unified Loyalty & Commerce Network",
     page_icon="💳",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # Custom CSS - World-Class Design
@@ -948,25 +948,60 @@ def merchant_dashboard():
             padding-bottom: 0.8rem;
             border-bottom: 3px solid {MD_COLORS['primary']};
         }}
+        .top-nav {{
+            background: {MD_COLORS['card_bg']};
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
     </style>
     """, unsafe_allow_html=True)
 
-    # Sidebar
-    st.sidebar.markdown(f"""
-    <div style='padding: 1.5rem; background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['info']} 100%);
-                border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
-        <div style='color: white; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;'>🏪 {merchant_data['name']}</div>
-        <div style='color: rgba(255,255,255,0.95); font-size: 0.9rem; font-weight: 500;'>{merchant_data['owner']}</div>
-        <div style='color: rgba(255,255,255,0.85); font-size: 0.8rem; margin-top: 0.3rem;'>📱 {merchant_data['phone']}</div>
+    # TOP NAVIGATION BAR - Always visible
+    st.markdown(f"""
+    <div style='background: {MD_COLORS['card_bg']}; padding: 1.2rem 2rem; border-radius: 12px;
+                margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                display: flex; justify-content: space-between; align-items: center;'>
+        <div>
+            <div style='color: {MD_COLORS['text_dark']}; font-size: 1.3rem; font-weight: 700;'>
+                🏪 {merchant_data['name']}
+            </div>
+            <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; margin-top: 0.2rem;'>
+                {merchant_data['owner']} • {merchant_data['phone']}
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-    menu = st.sidebar.radio("Navigation", ["🏠 Dashboard", "🛍️ Products"], label_visibility="collapsed")
+    # BACK and LOGOUT buttons at top
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    with col1:
+        if st.button("⬅️ Back to Home", use_container_width=True):
+            st.session_state.logged_in = False
+            st.session_state.page = 'landing'
+            st.rerun()
+    with col4:
+        if st.button("🚪 Logout", use_container_width=True):
+            st.session_state.logged_in = False
+            st.session_state.page = 'landing'
+            st.rerun()
 
-    if st.sidebar.button("🚪 Logout", use_container_width=True):
-        st.session_state.logged_in = False
-        st.session_state.page = 'landing'
-        st.rerun()
+    st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+    # Sidebar Navigation
+    st.sidebar.markdown(f"""
+    <div style='padding: 1.5rem; background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['info']} 100%);
+                border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+        <div style='color: white; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem;'>Merchant Portal</div>
+        <div style='color: rgba(255,255,255,0.85); font-size: 0.8rem;'>Navigate below</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    menu = st.sidebar.radio("Navigation", ["🏠 Dashboard", "🛍️ Products"], label_visibility="visible")
 
     # Load data
     products = md_load_products(merchant_phone)
