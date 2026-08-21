@@ -1,0 +1,8 @@
+{
+  "timestamp": "20260821_115817",
+  "datetime": "2026-08-21T11:58:17.455571",
+  "backups": {
+    "merchant": "/home/ec2-user/localkard/streamlit-demo/backups/merchant_data_20260821_115817",
+    "central": "/home/ec2-user/localkard/streamlit-demo/backups/central_data_20260821_115817"
+  }
+}
