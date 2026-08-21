@@ -550,6 +550,17 @@ MERCHANTS = {
         "pincode": "000000",
         "latitude": 19.0760,
         "longitude": 72.8777,
+    },
+    "demoshop3": {
+        "name": "Demo Shop 3",
+        "owner": "Demo Owner 3",
+        "password": "demoshop3",
+        "phone": "demoshop3",
+        "address": "456 Demo Street, Mumbai",
+        "locality": "Powai",
+        "pincode": "400076",
+        "latitude": 19.1197,
+        "longitude": 72.9078,
     }
 }
 
