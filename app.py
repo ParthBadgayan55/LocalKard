@@ -5,10 +5,10 @@ import streamlit.components.v1 as components
 import json
 import os
 
-# Import merchant modules at top level
+# Import merchant modules at top level with aliases to avoid naming conflicts
 try:
-    import merchant_data
-    import merchant_dashboard
+    import merchant_data as md_data
+    import merchant_dashboard as md_module
     MERCHANT_MODULES_LOADED = True
 except ImportError as e:
     MERCHANT_MODULES_LOADED = False
@@ -849,7 +849,7 @@ def merchant_dashboard():
     """Main merchant dashboard - calls comprehensive dashboard module"""
     if MERCHANT_MODULES_LOADED:
         try:
-            merchant_dashboard.merchant_dashboard_main(st.session_state.current_user)
+            md_module.merchant_dashboard_main(st.session_state.current_user)
             return
         except Exception as e:
             st.error(f"Error loading dashboard module: {e}")
