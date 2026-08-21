@@ -217,10 +217,85 @@ st.set_page_config(
 # Custom CSS - World-Class Design
 st.markdown("""
 <style>
-    /* Hide Streamlit branding */
+    /* Hide Streamlit branding but keep sidebar toggle */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+
+    /* Keep header visible for sidebar toggle */
+    header {visibility: visible !important;}
+
+    /* Style the sidebar collapse button to be more visible */
+    button[kind="header"] {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 0.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    button[kind="header"]:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        transform: scale(1.05) !important;
+    }
+
+    /* Ensure sidebar toggle is always visible when collapsed */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        left: 0 !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+        border-radius: 0 12px 12px 0 !important;
+        padding: 1.5rem 0.7rem !important;
+        cursor: pointer !important;
+        box-shadow: 3px 0 15px rgba(99, 102, 241, 0.5) !important;
+        z-index: 999999 !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="collapsedControl"]:hover {
+        background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+        transform: translateY(-50%) translateX(5px) !important;
+        box-shadow: 5px 0 20px rgba(99, 102, 241, 0.7) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Style the sidebar toggle icon */
+    [data-testid="collapsedControl"] svg {
+        fill: white !important;
+        width: 28px !important;
+        height: 28px !important;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
+    }
+
+    /* Ensure sidebar close button is visible */
+    [data-testid="stSidebar"] button[kind="header"] {
+        visibility: visible !important;
+        display: flex !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 0.5rem !important;
+        margin: 0.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="stSidebar"] button[kind="header"]:hover {
+        background: rgba(239, 68, 68, 0.2) !important;
+        border-color: rgba(239, 68, 68, 0.5) !important;
+        transform: scale(1.1) !important;
+    }
+
+    [data-testid="stSidebar"] button[kind="header"] svg {
+        fill: #EF4444 !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
 
     /* Main container */
     .main {
@@ -1084,6 +1159,51 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
+    # Add custom sidebar toggle button in main area
+    st.markdown("""
+    <script>
+    function toggleSidebar() {
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const collapseBtn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+
+        if (sidebar) {
+            // Check if sidebar is collapsed
+            const isCollapsed = sidebar.getAttribute('aria-expanded') === 'false';
+
+            if (isCollapsed && collapseBtn) {
+                collapseBtn.click();
+            } else {
+                // Find and click the close button in sidebar
+                const closeBtn = sidebar.querySelector('button[kind="header"]');
+                if (closeBtn) {
+                    closeBtn.click();
+                }
+            }
+        }
+    }
+    </script>
+
+    <button onclick="toggleSidebar()" style="
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 999999;
+        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.2rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 16px rgba(99, 102, 241, 0.6)';"
+       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.4)';">
+        ☰ Menu
+    </button>
+    """, unsafe_allow_html=True)
+
     # Logout
     col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
     with col4:
@@ -1100,6 +1220,16 @@ def merchant_dashboard():
                 border-radius: 12px; margin-bottom: 1.5rem;'>
         <div style='color: white; font-size: 1.1rem; font-weight: 700;'>🎯 Loyalty Dashboard</div>
         <div style='color: rgba(255,255,255,0.85); font-size: 0.75rem; margin-top: 0.3rem;'>World-Class System</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Sidebar collapse tip
+    st.sidebar.markdown("""
+    <div style='background: rgba(99, 102, 241, 0.1); border-left: 3px solid #6366F1;
+                padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem;'>
+        <div style='font-size: 0.75rem; color: #6366F1; font-weight: 600;'>
+            💡 TIP: Click the [×] icon at the top or use the arrow button on the left edge to collapse this sidebar
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
