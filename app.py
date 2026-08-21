@@ -1310,7 +1310,14 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    menu = st.sidebar.radio("Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"], label_visibility="visible")
+    # Check if menu selection from main area buttons
+    if 'merchant_menu' not in st.session_state:
+        st.session_state.merchant_menu = "🏠 Home"
+
+    menu = st.sidebar.radio("Navigation", ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"],
+                           key="sidebar_menu",
+                           index=["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"].index(st.session_state.merchant_menu) if st.session_state.merchant_menu in ["🏠 Home", "💎 Loyalty", "👥 Customers", "📊 Analytics"] else 0,
+                           label_visibility="visible")
 
     # Load data
     customers = md_load_customers(merchant_phone)
