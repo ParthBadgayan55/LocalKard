@@ -539,6 +539,17 @@ MERCHANTS = {
         "pincode": "400050",
         "latitude": 19.0596,
         "longitude": 72.8295,
+    },
+    "demo": {
+        "name": "Demo Shop - Current Location",
+        "owner": "Demo Merchant",
+        "password": "demo123",
+        "phone": "demo",
+        "address": "Current GPS Location",
+        "locality": "Your Area",
+        "pincode": "000000",
+        "latitude": 19.0760,
+        "longitude": 72.8777,
     }
 }
 
@@ -557,6 +568,11 @@ CUSTOMERS = {
         "name": "Priya Shah",
         "password": "customer123",
         "phone": "9988776644",
+    },
+    "demo": {
+        "name": "Demo Customer",
+        "password": "demo123",
+        "phone": "demo",
     }
 }
 
@@ -680,7 +696,7 @@ def merchant_login_page():
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Merchant Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Username", placeholder="Enter your username", key="merchant_phone")
+        phone = st.text_input("Username / Phone Number", placeholder="Enter username or phone", key="merchant_phone")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="merchant_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
@@ -724,7 +740,7 @@ def customer_login_page():
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Customer Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Username", placeholder="Enter your username", key="customer_phone")
+        phone = st.text_input("Username / Phone Number", placeholder="Enter username or phone", key="customer_phone")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="customer_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
@@ -965,8 +981,8 @@ def merchant_signup_page():
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
         if st.button("Create Account", key="merchant_signup_btn", use_container_width=True):
-            if not all([shop_name, owner_name, phone, locality, pincode, address, password, confirm_password]):
-                st.error("Please fill all fields")
+            if not all([shop_name, owner_name, phone, password, confirm_password]):
+                st.error("Please fill all required fields (address fields optional)")
             elif password != confirm_password:
                 st.error("Passwords do not match")
             elif phone in MERCHANTS:
@@ -978,13 +994,14 @@ def merchant_signup_page():
                     "owner": owner_name,
                     "password": password,
                     "phone": phone,
-                    "address": address,
-                    "locality": locality,
-                    "pincode": pincode,
-                    "latitude": latitude,
-                    "longitude": longitude,
+                    "address": address if address else "Not provided",
+                    "locality": locality if locality else "Not provided",
+                    "pincode": pincode if pincode else "000000",
+                    "latitude": float(latitude) if latitude else 19.0760,
+                    "longitude": float(longitude) if longitude else 72.8777,
                 }
-                st.success("Account created successfully!")
+                st.success("✓ Account created successfully!")
+                st.info(f"Login with: {phone}")
                 st.session_state.page = 'merchant_login'
                 st.rerun()
 
