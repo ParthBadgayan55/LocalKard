@@ -977,20 +977,15 @@ def merchant_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # BACK and LOGOUT buttons at top
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-    with col1:
-        if st.button("⬅️ Back to Home", use_container_width=True):
-            st.session_state.logged_in = False
-            st.session_state.page = 'landing'
-            st.rerun()
+    # LOGOUT button at top
+    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
     with col4:
         if st.button("🚪 Logout", use_container_width=True):
             st.session_state.logged_in = False
             st.session_state.page = 'landing'
             st.rerun()
 
-    st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
 
     # Sidebar Navigation
     st.sidebar.markdown(f"""
