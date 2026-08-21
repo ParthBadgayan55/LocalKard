@@ -158,10 +158,10 @@ st.markdown("""
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
-        padding: 2.5rem 2rem;
+        padding: 2rem 1.5rem;
         width: 100%;
-        max-width: 340px;
-        height: 280px;
+        max-width: 300px;
+        height: 260px;
         margin: 0 auto;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -503,10 +503,10 @@ def landing_page():
     """, unsafe_allow_html=True)
 
     # Login Cards
-    col1, col2, col3 = st.columns([1, 2.5, 1])
+    col1, col2, col3 = st.columns([0.5, 3, 0.5])
 
     with col2:
-        c1, c2 = st.columns(2, gap="large")
+        c1, c2, c3 = st.columns(3, gap="medium")
 
         with c1:
             st.markdown("""
@@ -530,6 +530,18 @@ def landing_page():
             """, unsafe_allow_html=True)
             if st.button("Login as Customer", key="customer_btn", use_container_width=True):
                 st.session_state.page = 'customer_login'
+                st.rerun()
+
+        with c3:
+            st.markdown("""
+            <div class="login-card">
+                <div class="card-icon">🔍</div>
+                <div class="card-title">Discover</div>
+                <div class="card-description">Browse all shops in the network</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Discover Shops", key="discover_btn", use_container_width=True):
+                st.session_state.page = 'discover'
                 st.rerun()
 
     # About Us Section - Header and description
@@ -622,6 +634,17 @@ def merchant_login_page():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
+        # Signup link
+        st.markdown("""
+        <div style='text-align: center; margin-top: 1.5rem;'>
+            <span style='color: #a0a0c0; font-size: 0.9rem;'>Don't have an account? </span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("Create Merchant Account", key="merchant_signup_link", use_container_width=True):
+            st.session_state.page = 'merchant_signup'
+            st.rerun()
+
 # Customer Login
 def customer_login_page():
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
@@ -654,6 +677,17 @@ def customer_login_page():
             st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # Signup link
+        st.markdown("""
+        <div style='text-align: center; margin-top: 1.5rem;'>
+            <span style='color: #a0a0c0; font-size: 0.9rem;'>Don't have an account? </span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("Create Customer Account", key="customer_signup_link", use_container_width=True):
+            st.session_state.page = 'customer_signup'
+            st.rerun()
 
 # Merchant Dashboard
 def merchant_dashboard():
@@ -749,6 +783,141 @@ def customer_dashboard():
         st.subheader("Loyalty Rewards")
         st.write("Track your points and rewards")
 
+# Merchant Signup
+def merchant_signup_page():
+    st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1.2, 1, 1.2])
+
+    with col2:
+        st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Merchant Signup</div>', unsafe_allow_html=True)
+
+        shop_name = st.text_input("Shop Name", placeholder="Enter your shop name", key="signup_shop_name")
+        owner_name = st.text_input("Owner Name", placeholder="Enter your name", key="signup_owner_name")
+        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="signup_phone")
+        password = st.text_input("Password", type="password", placeholder="Create a password", key="signup_password")
+        confirm_password = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="signup_confirm_password")
+
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Create Account", key="merchant_signup_btn", use_container_width=True):
+            if not all([shop_name, owner_name, phone, password, confirm_password]):
+                st.error("Please fill all fields")
+            elif password != confirm_password:
+                st.error("Passwords do not match")
+            elif phone in MERCHANTS:
+                st.error("Account already exists")
+            else:
+                # Add new merchant (in real app, this would save to database)
+                MERCHANTS[phone] = {
+                    "name": shop_name,
+                    "owner": owner_name,
+                    "password": password,
+                    "phone": phone,
+                }
+                st.success("Account created successfully!")
+                st.session_state.page = 'merchant_login'
+                st.rerun()
+
+        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Back to Login", key="back_to_merchant_login", use_container_width=True):
+            st.session_state.page = 'merchant_login'
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# Customer Signup
+def customer_signup_page():
+    st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1.2, 1, 1.2])
+
+    with col2:
+        st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Customer Signup</div>', unsafe_allow_html=True)
+
+        name = st.text_input("Full Name", placeholder="Enter your name", key="signup_name")
+        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="signup_customer_phone")
+        password = st.text_input("Password", type="password", placeholder="Create a password", key="signup_customer_password")
+        confirm_password = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="signup_customer_confirm_password")
+
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Create Account", key="customer_signup_btn", use_container_width=True):
+            if not all([name, phone, password, confirm_password]):
+                st.error("Please fill all fields")
+            elif password != confirm_password:
+                st.error("Passwords do not match")
+            elif phone in CUSTOMERS:
+                st.error("Account already exists")
+            else:
+                # Add new customer (in real app, this would save to database)
+                CUSTOMERS[phone] = {
+                    "name": name,
+                    "password": password,
+                    "phone": phone,
+                }
+                st.success("Account created successfully!")
+                st.session_state.page = 'customer_login'
+                st.rerun()
+
+        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Back to Login", key="back_to_customer_login", use_container_width=True):
+            st.session_state.page = 'customer_login'
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# Discover Shops
+def discover_page():
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="dashboard-header">
+        <div class="dashboard-title">Discover Shops</div>
+        <div class="dashboard-subtitle">Browse all onboarded merchants in the LocalKard network</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("← Back to Home", key="back_from_discover"):
+        st.session_state.page = 'landing'
+        st.rerun()
+
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+
+    # Display all merchants
+    col1, col2, col3 = st.columns([0.5, 3, 0.5])
+
+    with col2:
+        st.markdown('<div class="about-section">', unsafe_allow_html=True)
+
+        for phone, merchant in MERCHANTS.items():
+            st.markdown(f"""
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="color: #ffffff; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem;">
+                            🏪 {merchant['name']}
+                        </div>
+                        <div style="color: #a0a0c0; font-size: 0.95rem;">
+                            Owner: {merchant['owner']}
+                        </div>
+                        <div style="color: #667eea; font-size: 0.9rem; margin-top: 0.3rem;">
+                            📞 {phone}
+                        </div>
+                    </div>
+                    <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 1.5rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                        Active
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
 # Router
 if st.session_state.page == 'landing':
     landing_page()
@@ -756,6 +925,12 @@ elif st.session_state.page == 'merchant_login':
     merchant_login_page()
 elif st.session_state.page == 'customer_login':
     customer_login_page()
+elif st.session_state.page == 'merchant_signup':
+    merchant_signup_page()
+elif st.session_state.page == 'customer_signup':
+    customer_signup_page()
+elif st.session_state.page == 'discover':
+    discover_page()
 elif st.session_state.page == 'merchant_dashboard':
     merchant_dashboard()
 elif st.session_state.page == 'customer_dashboard':
