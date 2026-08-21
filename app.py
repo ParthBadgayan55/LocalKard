@@ -759,10 +759,12 @@ def merchant_login_page():
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
         if st.button("Sign In", key="merchant_login_btn", use_container_width=True):
-            if phone in MERCHANTS and MERCHANTS[phone]["password"] == password:
+            # Reload merchants to get latest data
+            current_merchants = load_merchants()
+            if phone in current_merchants and current_merchants[phone]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'merchant'
-                st.session_state.current_user = MERCHANTS[phone]
+                st.session_state.current_user = current_merchants[phone]
                 st.session_state.page = 'merchant_dashboard'
                 st.rerun()
             else:
@@ -803,10 +805,12 @@ def customer_login_page():
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
         if st.button("Sign In", key="customer_login_btn", use_container_width=True):
-            if phone in CUSTOMERS and CUSTOMERS[phone]["password"] == password:
+            # Reload customers to get latest data
+            current_customers = load_customers()
+            if phone in current_customers and current_customers[phone]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'customer'
-                st.session_state.current_user = CUSTOMERS[phone]
+                st.session_state.current_user = current_customers[phone]
                 st.session_state.page = 'customer_dashboard'
                 st.rerun()
             else:
