@@ -4,839 +4,495 @@ from datetime import datetime, timedelta
 
 # Page config
 st.set_page_config(
-    page_title="LocalKard Phase 1 Demo",
-    page_icon="🛍️",
+    page_title="LocalKard",
+    page_icon="💳",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# Custom CSS
+# Custom CSS - Sleek, Futuristic Design
 st.markdown("""
 <style>
-    .main > div {
-        padding-top: 2rem;
+    /* Hide Streamlit branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+
+    /* Main container */
+    .main {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        padding: 0;
     }
-    .stMetric {
-        background-color: #f0f2f6;
-        padding: 15px;
+
+    .stApp {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    }
+
+    /* Landing page container */
+    .landing-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    /* Logo/Brand */
+    .brand {
+        font-size: 4rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        letter-spacing: -2px;
+        text-transform: uppercase;
+    }
+
+    .tagline {
+        color: #a0a0c0;
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-bottom: 4rem;
+        letter-spacing: 2px;
+    }
+
+    /* Login cards */
+    .login-cards {
+        display: flex;
+        gap: 3rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        width: 350px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 12px 48px 0 rgba(102, 126, 234, 0.3);
+    }
+
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        color: #ffffff;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .card-description {
+        color: #a0a0c0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* Login form */
+    .login-form-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 3rem;
+        max-width: 450px;
+        margin: 2rem auto;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    .form-title {
+        color: #ffffff;
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    /* Input fields */
+    .stTextInput > div > div > input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 10px;
-        border-left: 4px solid #2563eb;
+        color: #ffffff;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
     }
-    .chat-message {
-        padding: 10px 15px;
-        border-radius: 10px;
-        margin: 5px 0;
-        max-width: 80%;
+
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
     }
-    .chat-bot {
-        background-color: #e8e8e8;
-        margin-right: auto;
-    }
-    .chat-user {
-        background-color: #dcf8c6;
-        margin-left: auto;
-        text-align: right;
-    }
-    .feature-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    /* Buttons */
+    .stButton > button {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px;
+        border: none;
         border-radius: 10px;
-        margin: 10px 0;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
     }
-    h1 {
-        color: #2563eb;
+
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
     }
+
+    /* Back button */
+    .back-link {
+        color: #667eea;
+        text-align: center;
+        margin-top: 1.5rem;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .back-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    /* Labels */
+    .stTextInput > label {
+        color: #a0a0c0 !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+    }
+
+    /* Dashboard styles */
+    .dashboard-header {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-title {
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-subtitle {
+        color: #a0a0c0;
+        font-size: 1.1rem;
+    }
+
+    /* Metrics */
+    .stMetric {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+    }
+
+    .stMetric label {
+        color: #a0a0c0 !important;
+        font-size: 0.9rem !important;
+    }
+
+    .stMetric [data-testid="stMetricValue"] {
+        color: #ffffff !important;
+        font-size: 2rem !important;
+    }
+
+    /* Dataframes */
+    .dataframe {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #ffffff !important;
+    }
+
+    /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 0.5rem;
     }
+
     .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        background-color: #f0f2f6;
-        border-radius: 5px;
+        color: #a0a0c0;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Initialize session state
+if 'page' not in st.session_state:
+    st.session_state.page = 'landing'
+if 'user_type' not in st.session_state:
+    st.session_state.user_type = None
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
-    st.session_state.current_shop = None
+if 'current_user' not in st.session_state:
+    st.session_state.current_user = None
 
 # Sample data
-SAMPLE_SHOPS = {
+MERCHANTS = {
     "9876543210": {
         "name": "Fresh Mart Grocery",
         "owner": "Rajesh Kumar",
-        "category": "grocery",
+        "password": "merchant123",
         "phone": "9876543210",
-        "password": "password123",
-        "address": "123 Main Street, Mumbai",
-        "whatsapp": "9876543210",
-        "products": [
-            {"id": 1, "name": "Rice (Basmati)", "category": "groceries", "price": 120, "unit": "kg", "stock": True, "reorder": True, "frequency": 30},
-            {"id": 2, "name": "Wheat Flour (Atta)", "category": "groceries", "price": 45, "unit": "kg", "stock": True, "reorder": True, "frequency": 30},
-            {"id": 3, "name": "Sugar", "category": "groceries", "price": 42, "unit": "kg", "stock": True, "reorder": True, "frequency": 30},
-            {"id": 4, "name": "Milk (Full Cream)", "category": "dairy", "price": 60, "unit": "liter", "stock": True, "reorder": True, "frequency": 7},
-            {"id": 5, "name": "Bread", "category": "bakery", "price": 35, "unit": "piece", "stock": True, "reorder": True, "frequency": 3},
-            {"id": 6, "name": "Tomatoes", "category": "vegetables", "price": 30, "unit": "kg", "stock": True, "reorder": False, "frequency": 0},
-            {"id": 7, "name": "Onions", "category": "vegetables", "price": 25, "unit": "kg", "stock": True, "reorder": False, "frequency": 0},
-            {"id": 8, "name": "Eggs", "category": "dairy", "price": 70, "unit": "dozen", "stock": True, "reorder": True, "frequency": 7},
-        ],
-        "orders": [
-            {"id": "ORD001", "customer": "9988776655", "customer_name": "Amit Patel", "items": "Rice x2, Milk x3", "total": 420, "status": "pending", "date": "2026-08-21", "delivery": "pickup"},
-            {"id": "ORD002", "customer": "9988776644", "customer_name": "Priya Shah", "items": "Bread x5, Sugar x1", "total": 217, "status": "confirmed", "date": "2026-08-20", "delivery": "delivery"},
-            {"id": "ORD003", "customer": "9988776633", "customer_name": "Rahul Kumar", "items": "Wheat Flour x2, Eggs x1", "total": 160, "status": "ready", "date": "2026-08-20", "delivery": "pickup"},
-        ]
     },
     "9876543211": {
         "name": "Pet Paradise",
         "owner": "Priya Sharma",
-        "category": "pet-store",
+        "password": "merchant123",
         "phone": "9876543211",
-        "password": "password123",
-        "address": "456 Park Road, Mumbai",
-        "whatsapp": "9876543211",
-        "products": [
-            {"id": 1, "name": "Dog Food (Premium)", "category": "pet-food", "price": 850, "unit": "3kg bag", "stock": True, "reorder": True, "frequency": 30},
-            {"id": 2, "name": "Cat Food (Premium)", "category": "pet-food", "price": 650, "unit": "2kg bag", "stock": True, "reorder": True, "frequency": 30},
-            {"id": 3, "name": "Dog Treats", "category": "pet-food", "price": 150, "unit": "pack", "stock": True, "reorder": True, "frequency": 15},
-            {"id": 4, "name": "Cat Litter", "category": "other", "price": 350, "unit": "5kg bag", "stock": True, "reorder": True, "frequency": 20},
-            {"id": 5, "name": "Pet Shampoo", "category": "other", "price": 250, "unit": "bottle", "stock": True, "reorder": False, "frequency": 0},
-        ],
-        "orders": [
-            {"id": "PET001", "customer": "9988776622", "customer_name": "Neha Desai", "items": "Dog Food x1, Dog Treats x2", "total": 1150, "status": "delivered", "date": "2026-08-19", "delivery": "delivery"},
-        ]
     }
 }
 
-# Header
-st.title("🛍️ LocalKard Phase 1 - Interactive Demo")
-st.markdown("**WhatsApp-Native Digital Catalog with Automated Reorder Reminders & Cross-Shop Discovery**")
-st.markdown("---")
+CUSTOMERS = {
+    "9988776655": {
+        "name": "Amit Patel",
+        "password": "customer123",
+        "phone": "9988776655",
+    },
+    "9988776644": {
+        "name": "Priya Shah",
+        "password": "customer123",
+        "phone": "9988776644",
+    }
+}
 
-# Sidebar
-with st.sidebar:
-    st.image("https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f6cd.png", width=80)
-    st.header("🧭 Navigation")
+# Landing Page
+def landing_page():
+    st.markdown("""
+    <div class="landing-container">
+        <div class="brand">LocalKard</div>
+        <div class="tagline">Your Digital Commerce Companion</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if not st.session_state.logged_in:
-        page = st.radio(
-            "Choose a page:",
-            ["🏠 Overview", "🔐 Shop Login", "💬 WhatsApp Demo", "📚 Documentation"],
-            label_visibility="collapsed"
-        )
-    else:
-        st.success(f"✅ Logged in as **{st.session_state.current_shop['name']}**")
-        page = st.radio(
-            "Choose a page:",
-            ["📊 Dashboard", "📦 Products", "🛒 Orders", "💬 WhatsApp Demo", "👤 Profile"],
-            label_visibility="collapsed"
-        )
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-        st.markdown("---")
-        if st.button("🚪 Logout", use_container_width=True):
-            st.session_state.logged_in = False
-            st.session_state.current_shop = None
+    with col2:
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.markdown("""
+            <div class="login-card">
+                <div class="card-icon">🏪</div>
+                <div class="card-title">Merchant</div>
+                <div class="card-description">Manage your store, products, and orders</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Login as Merchant", key="merchant_btn", use_container_width=True):
+                st.session_state.page = 'merchant_login'
+                st.rerun()
+
+        with c2:
+            st.markdown("""
+            <div class="login-card">
+                <div class="card-icon">👤</div>
+                <div class="card-title">Customer</div>
+                <div class="card-description">Browse shops and place orders</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Login as Customer", key="customer_btn", use_container_width=True):
+                st.session_state.page = 'customer_login'
+                st.rerun()
+
+# Merchant Login
+def merchant_login_page():
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col2:
+        st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">🏪 Merchant Login</div>', unsafe_allow_html=True)
+
+        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="merchant_phone")
+        password = st.text_input("Password", type="password", placeholder="Enter password", key="merchant_pass")
+
+        if st.button("Login", key="merchant_login_btn"):
+            if phone in MERCHANTS and MERCHANTS[phone]["password"] == password:
+                st.session_state.logged_in = True
+                st.session_state.user_type = 'merchant'
+                st.session_state.current_user = MERCHANTS[phone]
+                st.session_state.page = 'merchant_dashboard'
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid credentials")
+
+        st.markdown('<div class="back-link">', unsafe_allow_html=True)
+        if st.button("← Back to Home", key="back_merchant"):
+            st.session_state.page = 'landing'
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("### 🔗 Quick Links")
-    st.markdown("[📖 GitHub Repo](#) | [📄 Docs](#) | [🐛 Report Issue](#)")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.caption("Built with ❤️ for local businesses")
+        # Demo credentials
+        st.info("Demo: 9876543210 / merchant123")
 
-# Overview Page
-if page == "🏠 Overview":
-    col1, col2 = st.columns([2, 1])
-
-    with col1:
-        st.header("📊 System Overview")
+# Customer Login
+def customer_login_page():
+    col1, col2, col3 = st.columns([1, 1, 1])
 
     with col2:
-        st.info("👈 Login to explore the shop dashboard!")
+        st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">👤 Customer Login</div>', unsafe_allow_html=True)
+
+        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="customer_phone")
+        password = st.text_input("Password", type="password", placeholder="Enter password", key="customer_pass")
+
+        if st.button("Login", key="customer_login_btn"):
+            if phone in CUSTOMERS and CUSTOMERS[phone]["password"] == password:
+                st.session_state.logged_in = True
+                st.session_state.user_type = 'customer'
+                st.session_state.current_user = CUSTOMERS[phone]
+                st.session_state.page = 'customer_dashboard'
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid credentials")
+
+        st.markdown('<div class="back-link">', unsafe_allow_html=True)
+        if st.button("← Back to Home", key="back_customer"):
+            st.session_state.page = 'landing'
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Demo credentials
+        st.info("Demo: 9988776655 / customer123")
+
+# Merchant Dashboard
+def merchant_dashboard():
+    st.markdown(f"""
+    <div class="dashboard-header">
+        <div class="dashboard-title">Welcome, {st.session_state.current_user['owner']}</div>
+        <div class="dashboard-subtitle">{st.session_state.current_user['name']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Logout", key="merchant_logout"):
+        st.session_state.logged_in = False
+        st.session_state.page = 'landing'
+        st.rerun()
 
     # Metrics
     col1, col2, col3, col4 = st.columns(4)
-
     with col1:
-        st.metric("Total Shops", "2", "+2 this month")
+        st.metric("Today's Orders", "12", "+3")
     with col2:
-        st.metric("Products", "13", "+13")
+        st.metric("Revenue", "₹4,250", "+15%")
     with col3:
-        st.metric("Orders Today", "4", "+4")
+        st.metric("Active Products", "24", "")
     with col4:
-        st.metric("Active Reminders", "8", "+8")
+        st.metric("Pending Orders", "5", "")
 
-    st.markdown("---")
+    st.write("")
 
-    # Core Features
-    st.subheader("✅ Phase 1 Core Features")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        with st.expander("💬 **WhatsApp Integration**", expanded=True):
-            st.markdown("""
-            - ✅ Business API webhook integration
-            - ✅ Message parsing & routing
-            - ✅ Catalog browsing via chat
-            - ✅ Text-based ordering (`1x5, 2x3`)
-            - ✅ Order confirmations
-            - ✅ Interactive commands (CATALOG, NEARBY, HELP)
-            """)
-
-        with st.expander("🔔 **Automated Reorder Reminders**", expanded=True):
-            st.markdown("""
-            - ✅ Automatic reminder creation on order
-            - ✅ Daily cron job (9 AM)
-            - ✅ Frequency-based scheduling
-            - ✅ One-tap reorder with YES
-            - ✅ Smart dismissal
-            - ✅ Customizable intervals per product
-            """)
-
-    with col2:
-        with st.expander("🏪 **Shop Owner Dashboard**", expanded=True):
-            st.markdown("""
-            - ✅ Registration & JWT authentication
-            - ✅ Product CRUD operations
-            - ✅ Stock management
-            - ✅ Order tracking & status updates
-            - ✅ Profile settings
-            - ✅ Responsive web interface
-            """)
-
-        with st.expander("🗺️ **Cross-Shop Discovery**", expanded=True):
-            st.markdown("""
-            - ✅ MongoDB geospatial queries (2dsphere)
-            - ✅ Location-based search (5km radius)
-            - ✅ Category filtering
-            - ✅ Personalized recommendations
-            - ✅ Network effect between shops
-            - ✅ Automated suggestions while browsing
-            """)
-
-    st.markdown("---")
-
-    # Tech Stack
-    st.subheader("🛠️ Technology Stack")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("""
-        **Backend**
-        - Node.js 16+
-        - Express.js
-        - MongoDB + Mongoose
-        - node-cron
-        """)
-
-    with col2:
-        st.markdown("""
-        **Integration**
-        - WhatsApp Business API
-        - JWT Authentication
-        - bcrypt (password hashing)
-        - Axios (HTTP client)
-        """)
-
-    with col3:
-        st.markdown("""
-        **Frontend**
-        - Vanilla HTML/CSS/JS
-        - Responsive design
-        - RESTful API
-        - 10+ endpoints
-        """)
-
-    st.markdown("---")
-
-    # Key Highlights
-    st.success("""
-    ### 🎯 Zero Payment Strategy
-
-    ✅ **No payment gateway integration**
-    ✅ **No KYC requirements**
-    ✅ **Customers pay directly to shops** (cash/UPI)
-    ✅ **Faster launch, zero regulatory burden**
-    ✅ **Focus on core value:** Discovery + Reorders
-    """)
-
-    st.info("""
-    ### 📈 By the Numbers
-
-    **26 files created** | **13 JavaScript source files** | **5 database models**
-    **10+ API endpoints** | **5 documentation files** | **Ready to deploy**
-    """)
-
-# Login Page
-elif page == "🔐 Shop Login":
-    st.header("🔐 Shop Owner Login")
-
-    col1, col2 = st.columns([1, 1])
-
-    with col1:
-        with st.form("login_form"):
-            st.subheader("Login to Dashboard")
-
-            phone = st.text_input("📱 Phone Number", value="9876543210", max_chars=10)
-            password = st.text_input("🔒 Password", type="password", value="password123")
-
-            submit = st.form_submit_button("🚀 Login", use_container_width=True)
-
-            if submit:
-                if phone in SAMPLE_SHOPS and SAMPLE_SHOPS[phone]["password"] == password:
-                    st.session_state.logged_in = True
-                    st.session_state.current_shop = SAMPLE_SHOPS[phone]
-                    st.success(f"✅ Welcome back, {SAMPLE_SHOPS[phone]['owner']}!")
-                    st.balloons()
-                    st.rerun()
-                else:
-                    st.error("❌ Invalid credentials. Please try again.")
-
-    with col2:
-        st.info("""
-        ### 🔑 Demo Credentials
-
-        **Fresh Mart Grocery**
-        - Phone: `9876543210`
-        - Password: `password123`
-
-        **Pet Paradise**
-        - Phone: `9876543211`
-        - Password: `password123`
-
-        ---
-
-        💡 **Tip:** In production, these would be registered through the shop registration form with proper authentication.
-        """)
-
-# Dashboard Page
-elif page == "📊 Dashboard" and st.session_state.logged_in:
-    shop = st.session_state.current_shop
-
-    st.header(f"📊 {shop['name']} Dashboard")
-    st.caption(f"👤 Owner: {shop['owner']} | 📂 Category: {shop['category']}")
-
-    # Metrics
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric("Total Products", len(shop['products']))
-    with col2:
-        in_stock = sum(1 for p in shop['products'] if p['stock'])
-        st.metric("In Stock", in_stock)
-    with col3:
-        pending = sum(1 for o in shop['orders'] if o['status'] == 'pending')
-        st.metric("Pending Orders", pending)
-    with col4:
-        st.metric("Total Orders", len(shop['orders']))
-
-    st.markdown("---")
-
-    # Recent Orders
-    st.subheader("📈 Recent Orders")
-
-    if shop['orders']:
-        df = pd.DataFrame(shop['orders'])
-
-        # Style the dataframe
-        def style_status(val):
-            colors = {
-                'pending': 'background-color: #fef3c7; color: #92400e',
-                'confirmed': 'background-color: #dbeafe; color: #1e40af',
-                'ready': 'background-color: #d1fae5; color: #065f46',
-                'delivered': 'background-color: #e5e7eb; color: #374151'
-            }
-            return colors.get(val, '')
-
-        styled_df = df.style.applymap(style_status, subset=['status'])
-        st.dataframe(styled_df, use_container_width=True, hide_index=True)
-    else:
-        st.info("📭 No orders yet. Share your WhatsApp catalog with customers!")
-
-    st.markdown("---")
-
-    # Quick Actions
-    st.subheader("⚡ Quick Actions")
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        if st.button("➕ Add New Product", use_container_width=True):
-            st.info("Navigate to Products tab to add items")
-
-    with col2:
-        if st.button("📱 WhatsApp Status", use_container_width=True):
-            st.success("✅ WhatsApp Connected")
-
-    with col3:
-        if st.button("📊 View Analytics", use_container_width=True):
-            st.info("Coming in Phase 2!")
-
-# Products Page
-elif page == "📦 Products" and st.session_state.logged_in:
-    shop = st.session_state.current_shop
-
-    st.header(f"📦 Product Management - {shop['name']}")
-
-    tab1, tab2 = st.tabs(["📋 Product List", "➕ Add Product"])
+    # Tabs for different sections
+    tab1, tab2, tab3 = st.tabs(["📦 Orders", "🛍️ Products", "📊 Analytics"])
 
     with tab1:
-        st.subheader("Your Products")
-
-        # Group products by category
-        categories = {}
-        for product in shop['products']:
-            cat = product['category']
-            if cat not in categories:
-                categories[cat] = []
-            categories[cat].append(product)
-
-        for category, products in categories.items():
-            st.markdown(f"### {category.upper()}")
-
-            for product in products:
-                with st.expander(f"**{product['name']}** - ₹{product['price']}/{product['unit']}"):
-                    col1, col2 = st.columns([2, 1])
-
-                    with col1:
-                        st.write(f"**Category:** {product['category']}")
-                        st.write(f"**Stock:** {'✅ In Stock' if product['stock'] else '❌ Out of Stock'}")
-
-                        if product['reorder']:
-                            st.write(f"**Reorder:** 🔔 Enabled (every {product['frequency']} days)")
-                        else:
-                            st.write("**Reorder:** Disabled")
-
-                    with col2:
-                        if st.button(f"Toggle Stock", key=f"stock_{product['id']}_{shop['phone']}"):
-                            st.success("✅ Stock status updated!")
-
-                        if st.button(f"🗑️ Delete", key=f"delete_{product['id']}_{shop['phone']}", type="secondary"):
-                            st.warning("⚠️ Product deleted!")
+        st.subheader("Recent Orders")
+        orders_data = {
+            "Order ID": ["ORD001", "ORD002", "ORD003"],
+            "Customer": ["Amit Patel", "Priya Shah", "Rahul Kumar"],
+            "Amount": ["₹420", "₹217", "₹160"],
+            "Status": ["Pending", "Confirmed", "Ready"]
+        }
+        st.dataframe(pd.DataFrame(orders_data), use_container_width=True)
 
     with tab2:
-        st.subheader("Add New Product")
+        st.subheader("Product Catalog")
+        st.write("Manage your products here")
 
-        with st.form("add_product_form"):
-            col1, col2 = st.columns(2)
+    with tab3:
+        st.subheader("Sales Analytics")
+        st.write("View your business insights")
 
-            with col1:
-                new_name = st.text_input("Product Name*", placeholder="e.g., Tomatoes")
-                new_category = st.selectbox("Category*",
-                    ["groceries", "vegetables", "fruits", "dairy", "bakery", "pet-food", "medicines", "household", "other"])
-                new_price = st.number_input("Price (₹)*", min_value=0.0, step=1.0, value=0.0)
+# Customer Dashboard
+def customer_dashboard():
+    st.markdown(f"""
+    <div class="dashboard-header">
+        <div class="dashboard-title">Welcome, {st.session_state.current_user['name']}</div>
+        <div class="dashboard-subtitle">Discover local shops</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-            with col2:
-                new_unit = st.text_input("Unit*", value="piece", placeholder="kg, liter, piece")
-                new_reorder = st.checkbox("Enable Reorder Reminders", value=False)
+    if st.button("Logout", key="customer_logout"):
+        st.session_state.logged_in = False
+        st.session_state.page = 'landing'
+        st.rerun()
 
-                if new_reorder:
-                    new_frequency = st.number_input("Reorder Frequency (days)", min_value=1, max_value=365, value=30)
-                else:
-                    new_frequency = 0
-
-            new_description = st.text_area("Description (optional)", placeholder="Product details...")
-
-            submit = st.form_submit_button("✅ Add Product", use_container_width=True)
-
-            if submit:
-                if new_name and new_price > 0:
-                    st.success(f"✅ Added **{new_name}** to your catalog!")
-                    st.balloons()
-                else:
-                    st.error("❌ Please fill all required fields")
-
-# Orders Page
-elif page == "🛒 Orders" and st.session_state.logged_in:
-    shop = st.session_state.current_shop
-
-    st.header(f"🛒 Order Management - {shop['name']}")
-
-    # Filter
-    col1, col2 = st.columns([1, 3])
+    # Metrics
+    col1, col2, col3 = st.columns(3)
     with col1:
-        filter_status = st.selectbox("Filter by Status:", ["All", "pending", "confirmed", "ready", "delivered"])
-
-    st.markdown("---")
-
-    if shop['orders']:
-        filtered_orders = [o for o in shop['orders'] if filter_status == "All" or o['status'] == filter_status]
-
-        if filtered_orders:
-            for order in filtered_orders:
-                with st.expander(f"**Order #{order['id']}** - ₹{order['total']} ({order['status'].upper()})"):
-                    col1, col2 = st.columns([2, 1])
-
-                    with col1:
-                        st.write(f"**Customer:** {order['customer_name']} ({order['customer']})")
-                        st.write(f"**Items:** {order['items']}")
-                        st.write(f"**Total:** ₹{order['total']}")
-                        st.write(f"**Date:** {order['date']}")
-                        st.write(f"**Delivery:** {order['delivery'].capitalize()}")
-
-                        status_colors = {
-                            'pending': '🟡',
-                            'confirmed': '🔵',
-                            'ready': '🟢',
-                            'delivered': '⚪'
-                        }
-                        st.write(f"**Status:** {status_colors.get(order['status'], '')} {order['status'].upper()}")
-
-                    with col2:
-                        if order['status'] == 'pending':
-                            if st.button("✅ Confirm", key=f"confirm_{order['id']}"):
-                                st.success("Order confirmed! Customer notified via WhatsApp.")
-                        elif order['status'] == 'confirmed':
-                            if st.button("📦 Mark Ready", key=f"ready_{order['id']}"):
-                                st.success("Order ready! Customer notified.")
-                        elif order['status'] == 'ready':
-                            if st.button("🚚 Mark Delivered", key=f"delivered_{order['id']}"):
-                                st.success("Order delivered! ✅")
-        else:
-            st.info(f"No {filter_status} orders found.")
-    else:
-        st.info("📭 No orders yet. Customers can order via WhatsApp!")
-
-# WhatsApp Demo Page
-elif page == "💬 WhatsApp Demo":
-    st.header("💬 WhatsApp Customer Experience")
-
-    col1, col2 = st.columns([1, 1])
-
-    with col1:
-        st.subheader("📱 Customer's WhatsApp")
-
-        # Chat container
-        chat_container = st.container()
-
-        with chat_container:
-            # Welcome message
-            st.markdown("""
-            <div class="chat-message chat-bot">
-            👋 Welcome to LocalKard!<br><br>
-            Discover local shops and their products.<br><br>
-            Commands:<br>
-            • CATALOG - Browse shops<br>
-            • NEARBY - Find shops near you<br>
-            • HELP - Get help
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div class="chat-message chat-user">CATALOG</div>', unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="chat-message chat-bot">
-            🏪 <b>Nearby LocalKard Shops</b><br><br>
-            1. <b>Fresh Mart Grocery</b><br>
-            &nbsp;&nbsp;&nbsp;grocery • Mumbai<br>
-            &nbsp;&nbsp;&nbsp;🚚 Delivery available<br><br>
-            2. <b>Pet Paradise</b><br>
-            &nbsp;&nbsp;&nbsp;pet-store • Mumbai<br>
-            &nbsp;&nbsp;&nbsp;🚚 Delivery available<br><br>
-            Reply with shop number to view catalog.
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div class="chat-message chat-user">SHOP 1</div>', unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="chat-message chat-bot">
-            🛍️ <b>Fresh Mart Grocery - Product Catalog</b><br><br>
-            <b>GROCERIES</b><br>
-            1. Rice (Basmati) - ₹120/kg ✅<br>
-            2. Wheat Flour - ₹45/kg ✅<br>
-            3. Sugar - ₹42/kg ✅<br><br>
-            <b>DAIRY</b><br>
-            4. Milk - ₹60/liter ✅<br><br>
-            <b>BAKERY</b><br>
-            5. Bread - ₹35/piece ✅<br><br>
-            To order, reply with product numbers and quantities.<br>
-            Example: "1x5, 2x3"
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div class="chat-message chat-user">1x2, 4x3</div>', unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="chat-message chat-bot">
-            ✅ <b>Order Confirmed!</b><br><br>
-            Order ID: ORD123<br>
-            Fresh Mart Grocery<br><br>
-            <b>Items:</b><br>
-            • Rice (Basmati) x2 - ₹240<br>
-            • Milk x3 - ₹180<br><br>
-            <b>Total: ₹420</b><br><br>
-            You'll receive updates on your order status.
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div style="padding: 20px; background: #fff3cd; border-radius: 10px; margin: 10px 0;"><b>⏰ 30 days later...</b></div>', unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="chat-message chat-bot">
-            Hi there! 🔔<br><br>
-            Time to reorder <b>Rice (Basmati)</b> from <b>Fresh Mart Grocery</b>?<br><br>
-            Reply YES to place the same order, or CATALOG to browse all products.
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div class="chat-message chat-user">YES</div>', unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="chat-message chat-bot">
-            ✅ <b>Reorder Placed!</b><br><br>
-            Same items ordered again.<br>
-            Total: ₹420
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Input area
-        st.markdown("---")
-        user_input = st.text_input("💬 Type a message...", placeholder="e.g., CATALOG, NEARBY, 1x2")
-
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            if st.button("📱 CATALOG", use_container_width=True):
-                st.info("Browsing shops...")
-        with col_b:
-            if st.button("📍 NEARBY", use_container_width=True):
-                st.info("Finding nearby shops...")
-        with col_c:
-            if st.button("❓ HELP", use_container_width=True):
-                st.info("Commands: CATALOG, NEARBY, SHOP [n]")
-
+        st.metric("Your Orders", "8", "")
     with col2:
-        st.subheader("✨ Key Features Demonstrated")
+        st.metric("Loyalty Points", "450", "+50")
+    with col3:
+        st.metric("Nearby Shops", "12", "")
 
-        st.success("""
-        ### 1️⃣ Catalog Browsing
-        Customers browse products by category with simple commands.
-        """)
+    st.write("")
 
-        st.info("""
-        ### 2️⃣ Text-Based Ordering
-        Simple format: `1x5, 2x3`
-        Order 5 of item 1, 3 of item 2
-        """)
+    # Tabs
+    tab1, tab2, tab3 = st.tabs(["🏪 Browse Shops", "📦 My Orders", "💳 Loyalty"])
 
-        st.warning("""
-        ### 3️⃣ Reorder Reminders
-        Automated reminders after set intervals:
-        - Groceries: 30 days
-        - Dairy: 7 days
-        - Bread: 3 days
-        """)
+    with tab1:
+        st.subheader("Nearby Shops")
+        shops_data = {
+            "Shop": ["Fresh Mart Grocery", "Pet Paradise"],
+            "Category": ["Grocery", "Pet Store"],
+            "Distance": ["0.5 km", "1.2 km"],
+            "Rating": ["⭐ 4.5", "⭐ 4.8"]
+        }
+        st.dataframe(pd.DataFrame(shops_data), use_container_width=True)
 
-        st.success("""
-        ### 4️⃣ Order Confirmation
-        Instant confirmation with order details to both customer and shop.
-        """)
+    with tab2:
+        st.subheader("Your Orders")
+        st.write("View your order history")
 
-        st.markdown("---")
+    with tab3:
+        st.subheader("Loyalty Rewards")
+        st.write("Track your points and rewards")
 
-        st.markdown("### 📊 Commands Available")
-
-        commands = pd.DataFrame({
-            "Command": ["CATALOG", "NEARBY", "SHOP [n]", "HELP", "1x5, 2x3", "YES"],
-            "Description": [
-                "Browse all shops",
-                "Find shops near you",
-                "View shop's catalog",
-                "Show all commands",
-                "Place order",
-                "Reorder from reminder"
-            ]
-        })
-
-        st.dataframe(commands, use_container_width=True, hide_index=True)
-
-# Profile Page
-elif page == "👤 Profile" and st.session_state.logged_in:
-    shop = st.session_state.current_shop
-
-    st.header(f"👤 Shop Profile - {shop['name']}")
-
-    with st.form("profile_form"):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.text_input("Shop Name", value=shop['name'])
-            st.text_input("Owner Name", value=shop['owner'])
-            st.text_input("Phone", value=shop['phone'], disabled=True)
-
-        with col2:
-            st.selectbox("Category",
-                ["grocery", "pharmacy", "pet-store", "general-store", "bakery", "other"],
-                index=["grocery", "pharmacy", "pet-store", "general-store", "bakery", "other"].index(shop['category']))
-            st.text_input("WhatsApp Number", value=shop['whatsapp'])
-            st.text_input("Address", value=shop['address'])
-
-        st.markdown("### Delivery Settings")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.checkbox("Delivery Available", value=True)
-        with col2:
-            st.number_input("Delivery Radius (km)", value=5, min_value=1, max_value=20)
-
-        if st.form_submit_button("💾 Update Profile", use_container_width=True):
-            st.success("✅ Profile updated successfully!")
-
-# Documentation Page
-elif page == "📚 Documentation":
-    st.header("📚 LocalKard Documentation")
-
-    tabs = st.tabs(["📖 Overview", "🚀 Quick Start", "🔌 API", "💻 Tech Stack"])
-
-    with tabs[0]:
-        st.markdown("""
-        ## What is LocalKard?
-
-        LocalKard Phase 1 is a **WhatsApp-native digital catalog platform** that connects local shops with customers through:
-
-        - 💬 Chat-based ordering
-        - 🔔 Automated reorder reminders
-        - 🗺️ Cross-shop discovery
-        - 🚫 Zero payment complexity
-
-        ### Key Benefits
-
-        **For Shop Owners:**
-        - ✅ Free web dashboard
-        - ✅ Easy product management
-        - ✅ Order tracking
-        - ✅ No payment gateway needed
-        - ✅ Reach more customers
-
-        **For Customers:**
-        - ✅ No app download
-        - ✅ Order via familiar WhatsApp
-        - ✅ Never forget to reorder
-        - ✅ Discover nearby shops
-        - ✅ Pay as usual (cash/UPI)
-        """)
-
-    with tabs[1]:
-        st.markdown("""
-        ## 🚀 Quick Start Guide
-
-        ### Installation
-
-        ```bash
-        cd /home/ec2-user/localkard
-        ./INSTALL.sh
-        ```
-
-        ### Configuration
-
-        Create `.env` file:
-        ```env
-        MONGODB_URI=mongodb://localhost:27017/localkard
-        JWT_SECRET=your_secret_key
-        WHATSAPP_PHONE_NUMBER_ID=your_id
-        WHATSAPP_ACCESS_TOKEN=your_token
-        ```
-
-        ### Seed Test Data
-
-        ```bash
-        npm run seed
-        ```
-
-        ### Start Server
-
-        ```bash
-        npm run dev
-        # Opens on http://localhost:3000
-        ```
-
-        ### Test Login
-
-        - Phone: 9876543210
-        - Password: password123
-        """)
-
-    with tabs[2]:
-        st.markdown("""
-        ## 🔌 API Endpoints
-
-        ### Shop Endpoints
-
-        | Method | Endpoint | Description | Auth |
-        |--------|----------|-------------|------|
-        | POST | `/api/shop/register` | Register new shop | No |
-        | POST | `/api/shop/login` | Authenticate shop | No |
-        | GET | `/api/shop/profile` | Get shop details | Yes |
-        | PUT | `/api/shop/profile` | Update shop | Yes |
-        | POST | `/api/shop/products` | Add product | Yes |
-        | GET | `/api/shop/products` | List products | Yes |
-        | PUT | `/api/shop/products/:id` | Update product | Yes |
-        | DELETE | `/api/shop/products/:id` | Delete product | Yes |
-        | GET | `/api/shop/orders` | List orders | Yes |
-        | PUT | `/api/shop/orders/:id` | Update order status | Yes |
-
-        ### WhatsApp Webhook
-
-        | Method | Endpoint | Description |
-        |--------|----------|-------------|
-        | GET | `/api/whatsapp/webhook` | Verification |
-        | POST | `/api/whatsapp/webhook` | Message handler |
-        """)
-
-    with tabs[3]:
-        st.markdown("""
-        ## 💻 Technology Stack
-
-        ### Backend
-        - **Runtime:** Node.js 16+
-        - **Framework:** Express.js
-        - **Database:** MongoDB 5+
-        - **ODM:** Mongoose
-        - **Scheduling:** node-cron
-
-        ### Authentication
-        - **Tokens:** JWT
-        - **Passwords:** bcrypt (10 rounds)
-
-        ### Integration
-        - **Messaging:** WhatsApp Business Cloud API
-        - **HTTP Client:** Axios
-
-        ### Frontend
-        - **Dashboard:** Vanilla HTML/CSS/JavaScript
-        - **Design:** Responsive, mobile-friendly
-
-        ### Database Schema
-
-        **5 Collections:**
-        - `shops` - Shop profiles & locations
-        - `products` - Catalog items
-        - `customers` - User profiles
-        - `orders` - Order history
-        - `reorderreminders` - Scheduled reminders
-
-        **Key Indexes:**
-        - 2dsphere geospatial on shop coordinates
-        - Compound index on customer + product
-        - Status indexes for queries
-        """)
-
-# Footer
-st.markdown("---")
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.caption("🛍️ **LocalKard Phase 1**")
-    st.caption("Built for local businesses")
-
-with col2:
-    st.caption("**Tech Stack**")
-    st.caption("Node.js • MongoDB • WhatsApp API")
-
-with col3:
-    st.caption("**Demo Version**")
-    st.caption("Powered by Streamlit")
+# Router
+if st.session_state.page == 'landing':
+    landing_page()
+elif st.session_state.page == 'merchant_login':
+    merchant_login_page()
+elif st.session_state.page == 'customer_login':
+    customer_login_page()
+elif st.session_state.page == 'merchant_dashboard':
+    merchant_dashboard()
+elif st.session_state.page == 'customer_dashboard':
+    customer_dashboard()
