@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
+import json
+import os
 
 # Page config
 st.set_page_config(
@@ -505,8 +507,46 @@ if 'logged_in' not in st.session_state:
 if 'current_user' not in st.session_state:
     st.session_state.current_user = None
 
-# Sample data
-MERCHANTS = {
+# Data file paths
+MERCHANTS_FILE = 'merchants_data.json'
+CUSTOMERS_FILE = 'customers_data.json'
+
+# Load or initialize merchant data
+def load_merchants():
+    if os.path.exists(MERCHANTS_FILE):
+        try:
+            with open(MERCHANTS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            pass
+    return DEFAULT_MERCHANTS
+
+def save_merchants(merchants):
+    try:
+        with open(MERCHANTS_FILE, 'w') as f:
+            json.dump(merchants, f, indent=2)
+    except Exception as e:
+        st.error(f"Error saving merchant data: {e}")
+
+# Load or initialize customer data
+def load_customers():
+    if os.path.exists(CUSTOMERS_FILE):
+        try:
+            with open(CUSTOMERS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            pass
+    return DEFAULT_CUSTOMERS
+
+def save_customers(customers):
+    try:
+        with open(CUSTOMERS_FILE, 'w') as f:
+            json.dump(customers, f, indent=2)
+    except Exception as e:
+        st.error(f"Error saving customer data: {e}")
+
+# Default sample data
+DEFAULT_MERCHANTS = {
     "LocalKard": {
         "name": "LocalKard Demo Store",
         "owner": "LocalKard Admin",
@@ -564,7 +604,10 @@ MERCHANTS = {
     }
 }
 
-CUSTOMERS = {
+# Load data at startup
+MERCHANTS = load_merchants()
+
+DEFAULT_CUSTOMERS = {
     "LocalKard": {
         "name": "LocalKard Demo User",
         "password": "LocalKard@55",
@@ -586,6 +629,9 @@ CUSTOMERS = {
         "phone": "demo",
     }
 }
+
+# Load data at startup
+CUSTOMERS = load_customers()
 
 # Landing Page
 def landing_page():
@@ -1017,26 +1063,34 @@ def merchant_signup_page():
                 st.error("❌ Passwords do not match")
             elif len(password) < 6:
                 st.error("❌ Password must be at least 6 characters long")
-            elif phone in MERCHANTS:
-                st.error("❌ Account already exists with this phone number")
             else:
-                # Add new merchant with complete location data
-                MERCHANTS[phone] = {
-                    "name": shop_name,
-                    "owner": owner_name,
-                    "password": password,
-                    "phone": phone,
-                    "address": address,
-                    "locality": locality,
-                    "pincode": pincode,
-                    "latitude": float(latitude),
-                    "longitude": float(longitude),
-                }
-                st.success("✓ Account created successfully!")
-                st.info(f"📱 Login with: **{phone}**")
-                st.balloons()
-                st.session_state.page = 'merchant_login'
-                st.rerun()
+                # Load current merchants
+                current_merchants = load_merchants()
+
+                if phone in current_merchants:
+                    st.error("❌ Account already exists with this phone number")
+                else:
+                    # Add new merchant with complete location data
+                    current_merchants[phone] = {
+                        "name": shop_name,
+                        "owner": owner_name,
+                        "password": password,
+                        "phone": phone,
+                        "address": address,
+                        "locality": locality,
+                        "pincode": pincode,
+                        "latitude": float(latitude),
+                        "longitude": float(longitude),
+                    }
+
+                    # Save to file
+                    save_merchants(current_merchants)
+
+                    st.success("✓ Account created successfully!")
+                    st.info(f"📱 Login with: **{phone}**")
+                    st.balloons()
+                    st.session_state.page = 'merchant_login'
+                    st.rerun()
 
         st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
 
@@ -1068,18 +1122,27 @@ def customer_signup_page():
                 st.error("Please fill all fields")
             elif password != confirm_password:
                 st.error("Passwords do not match")
-            elif phone in CUSTOMERS:
-                st.error("Account already exists")
             else:
-                # Add new customer (in real app, this would save to database)
-                CUSTOMERS[phone] = {
-                    "name": name,
-                    "password": password,
-                    "phone": phone,
-                }
-                st.success("Account created successfully!")
-                st.session_state.page = 'customer_login'
-                st.rerun()
+                # Load current customers
+                current_customers = load_customers()
+
+                if phone in current_customers:
+                    st.error("Account already exists")
+                else:
+                    # Add new customer
+                    current_customers[phone] = {
+                        "name": name,
+                        "password": password,
+                        "phone": phone,
+                    }
+
+                    # Save to file
+                    save_customers(current_customers)
+
+                    st.success("Account created successfully!")
+                    st.info(f"📱 Login with: **{phone}**")
+                    st.session_state.page = 'customer_login'
+                    st.rerun()
 
         st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
 
@@ -1232,8 +1295,9 @@ def discover_page():
     st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
 
     # Calculate distances and filter merchants
+    current_merchants = load_merchants()
     merchant_distances = []
-    for phone, merchant in MERCHANTS.items():
+    for phone, merchant in current_merchants.items():
         if 'latitude' in merchant and 'longitude' in merchant:
             distance = calculate_distance(user_lat, user_lon, merchant['latitude'], merchant['longitude'])
             if distance <= max_distance:
