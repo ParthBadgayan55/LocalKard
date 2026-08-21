@@ -287,54 +287,51 @@ st.markdown("""
 
     /* Login form */
     .login-form-container {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(15px);
-        border: 2px solid rgba(255, 255, 255, 0.15);
-        border-radius: 25px;
-        padding: 3.5rem 3rem;
-        max-width: 480px;
-        margin: 3rem auto;
-        box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.5);
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        padding: 3rem 2.5rem;
+        max-width: 420px;
+        margin: 0 auto;
+        box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.5);
     }
 
     .form-title {
         color: #ffffff;
-        font-size: 2.2rem;
+        font-size: 2rem;
         font-weight: 700;
         margin-bottom: 2.5rem;
         text-align: center;
-        background: linear-gradient(90deg, #ffffff 0%, #c7c7ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .login-subtitle {
-        color: #a0a0c0;
-        font-size: 0.95rem;
-        text-align: center;
-        margin-bottom: 2rem;
         letter-spacing: 0.5px;
     }
 
     /* Input fields */
     .stTextInput > div > div > input {
-        background: rgba(255, 255, 255, 0.15) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 10px !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 12px !important;
         color: #ffffff !important;
-        padding: 0.75rem 1rem !important;
-        font-size: 1rem !important;
+        padding: 1rem 1.2rem !important;
+        font-size: 0.95rem !important;
+        transition: all 0.3s ease !important;
     }
 
     .stTextInput > div > div > input::placeholder {
-        color: rgba(255, 255, 255, 0.5) !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        font-weight: 400 !important;
     }
 
     .stTextInput > div > div > input:focus {
         border-color: #667eea !important;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
-        background: rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
+        background: rgba(255, 255, 255, 0.18) !important;
+        outline: none !important;
+    }
+
+    /* Hide labels */
+    .stTextInput > label {
+        display: none !important;
     }
 
     /* Buttons */
@@ -342,18 +339,33 @@ st.markdown("""
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        border-radius: 10px;
-        padding: 0.75rem 2rem;
-        font-size: 1.1rem;
+        border-radius: 12px;
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
         font-weight: 600;
         width: 100%;
         transition: all 0.3s ease;
-        margin-top: 1rem;
+        letter-spacing: 0.5px;
     }
 
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+    }
+
+    /* Back button styling */
+    div[data-testid="column"]:nth-child(2) .stButton:last-of-type > button {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #a0a0c0;
+    }
+
+    div[data-testid="column"]:nth-child(2) .stButton:last-of-type > button:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: none;
     }
 
     /* Labels */
@@ -575,75 +587,71 @@ def landing_page():
 
 # Merchant Login
 def merchant_login_page():
-    # Add spacing
-    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([1.2, 1, 1.2])
 
     with col2:
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
-        st.markdown('<div class="form-title">🏪 Merchant Portal</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">Access your store dashboard</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Merchant Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Phone Number / Username", placeholder="Enter your phone or username", key="merchant_phone")
-        password = st.text_input("Password", type="password", placeholder="Enter your password", key="merchant_pass")
+        phone = st.text_input("Username", placeholder="Enter username", key="merchant_phone", label_visibility="collapsed")
+        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+        password = st.text_input("Password", type="password", placeholder="Enter password", key="merchant_pass", label_visibility="collapsed")
 
-        if st.button("Sign In", key="merchant_login_btn"):
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Sign In", key="merchant_login_btn", use_container_width=True):
             if phone in MERCHANTS and MERCHANTS[phone]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'merchant'
                 st.session_state.current_user = MERCHANTS[phone]
                 st.session_state.page = 'merchant_dashboard'
-                st.success("✓ Login successful!")
                 st.rerun()
             else:
-                st.error("✗ Invalid credentials. Please try again.")
+                st.error("Invalid credentials")
 
-        if st.button("← Back to Home", key="back_merchant", use_container_width=True):
+        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Back", key="back_merchant", use_container_width=True):
             st.session_state.page = 'landing'
             st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Demo credentials
-        st.markdown("<div style='text-align: center; margin-top: 1rem;'></div>", unsafe_allow_html=True)
-        st.info("🔑 Demo Login: **LocalKard** • Password: **LocalKard@55**")
-
 # Customer Login
 def customer_login_page():
-    # Add spacing
-    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([1.2, 1, 1.2])
 
     with col2:
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
-        st.markdown('<div class="form-title">👤 Customer Portal</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">Browse and order from local shops</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Customer Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Phone Number / Username", placeholder="Enter your phone or username", key="customer_phone")
-        password = st.text_input("Password", type="password", placeholder="Enter your password", key="customer_pass")
+        phone = st.text_input("Username", placeholder="Enter username", key="customer_phone", label_visibility="collapsed")
+        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+        password = st.text_input("Password", type="password", placeholder="Enter password", key="customer_pass", label_visibility="collapsed")
 
-        if st.button("Sign In", key="customer_login_btn"):
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Sign In", key="customer_login_btn", use_container_width=True):
             if phone in CUSTOMERS and CUSTOMERS[phone]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'customer'
                 st.session_state.current_user = CUSTOMERS[phone]
                 st.session_state.page = 'customer_dashboard'
-                st.success("✓ Login successful!")
                 st.rerun()
             else:
-                st.error("✗ Invalid credentials. Please try again.")
+                st.error("Invalid credentials")
 
-        if st.button("← Back to Home", key="back_customer", use_container_width=True):
+        st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+
+        if st.button("Back", key="back_customer", use_container_width=True):
             st.session_state.page = 'landing'
             st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
-
-        # Demo credentials
-        st.markdown("<div style='text-align: center; margin-top: 1rem;'></div>", unsafe_allow_html=True)
-        st.info("🔑 Demo Login: **LocalKard** • Password: **LocalKard@55**")
 
 # Merchant Dashboard
 def merchant_dashboard():
