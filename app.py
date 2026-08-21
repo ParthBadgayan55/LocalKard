@@ -59,6 +59,72 @@ st.markdown("""
         letter-spacing: 1px;
     }
 
+    /* Swipe to Login */
+    .swipe-container {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .swipe-text {
+        color: #667eea;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .swipe-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .swipe-arrow {
+        color: #667eea;
+        font-size: 1.2rem;
+        animation: swipeLeft 2s ease-in-out infinite;
+    }
+
+    .swipe-arrow:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .swipe-arrow:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes swipeLeft {
+        0%, 100% {
+            opacity: 0.3;
+            transform: translateX(-10px);
+        }
+        50% {
+            opacity: 1;
+            transform: translateX(10px);
+        }
+    }
+
+    .swipe-line {
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
+        border-radius: 2px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.5;
+        }
+        50% {
+            opacity: 1;
+        }
+    }
+
     /* Login cards */
     .login-cards {
         display: flex;
@@ -299,9 +365,22 @@ def landing_page():
     # Single page layout - everything fits in viewport
     st.markdown("""
     <div style="display: flex; flex-direction: column; min-height: 100vh; justify-content: center; align-items: center; padding: 2rem;">
-        <div style="text-align: center; margin-bottom: 3rem;">
+        <div style="text-align: center; margin-bottom: 2.5rem;">
             <div class="brand">LocalKard</div>
             <div class="tagline">The Unified Loyalty & Commerce Network</div>
+
+            <div class="swipe-container">
+                <div class="swipe-text">Swipe to Login</div>
+                <div class="swipe-indicator">
+                    <span class="swipe-arrow">‹</span>
+                    <span class="swipe-arrow">‹</span>
+                    <span class="swipe-arrow">‹</span>
+                    <div class="swipe-line"></div>
+                    <span class="swipe-arrow">›</span>
+                    <span class="swipe-arrow">›</span>
+                    <span class="swipe-arrow">›</span>
+                </div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
