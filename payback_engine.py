@@ -9,6 +9,21 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 import hashlib
 
+# Import notification system
+try:
+    from whatsapp_manager import WhatsAppManager
+    from notification_queue import (
+        NotificationQueue, Notification, NotificationType,
+        create_points_earned_notification,
+        create_tier_upgrade_notification,
+        create_redemption_notification
+    )
+    import config
+    NOTIFICATIONS_AVAILABLE = True
+except ImportError:
+    NOTIFICATIONS_AVAILABLE = False
+    print("⚠️ Notification system not available")
+
 # ============================================================================
 # 1. CENTRAL CUSTOMER DATABASE
 # ============================================================================
@@ -315,12 +330,15 @@ class PointsEngine:
 class RedemptionEngine:
     """Handle points redemption"""
 
-    def __init__(self):
+    def __init__(self, payback_engine=None):
         self.customer_db = CentralCustomerDB()
         self.transaction_engine = TransactionEngine()
+        self.payback_engine = payback_engine
 
     def redeem_points(self, customer_id: str, merchant_id: str,
-                     points_to_redeem: float, purchase_amount: float) -> Dict:
+                     points_to_redeem: float, purchase_amount: float,
+                     merchant_name: str = 'LocalKard Merchant',
+                     language: str = 'en') -> Dict:
         """Redeem points for discount"""
         customer = self.customer_db.get_customer_by_id(customer_id)
 
@@ -353,6 +371,20 @@ class RedemptionEngine:
             points=-points_to_redeem,
             description=f'Redeemed {points_to_redeem} points for ₹{discount_value} discount'
         )
+
+        # Send redemption notification
+        if self.payback_engine and NOTIFICATIONS_AVAILABLE:
+            customer_phone = customer.get('phone')
+            if customer_phone:
+                self.payback_engine._send_notification(create_redemption_notification(
+                    customer_phone=customer_phone,
+                    merchant_id=merchant_id,
+                    merchant_name=merchant_name,
+                    points=points_to_redeem,
+                    value=discount_value,
+                    balance=new_balance,
+                    language=language
+                ))
 
         return {
             'success': True,
@@ -442,14 +474,132 @@ class FraudDetection:
 class PaybackEngine:
     """Main engine that orchestrates all components"""
 
+    # Shared notification queue (class variable)
+    _notification_queue = None
+    _whatsapp_manager = None
+    _notification_handler_initialized = False
+
     def __init__(self, merchant_id: str):
         self.merchant_id = merchant_id
         self.customer_db = CentralCustomerDB()
         self.transaction_engine = TransactionEngine()
         self.points_engine = PointsEngine(merchant_id)
-        self.redemption_engine = RedemptionEngine()
+        self.redemption_engine = RedemptionEngine(payback_engine=self)
         self.settlement = SettlementSystem()
         self.fraud = FraudDetection()
+
+        # Initialize notification system (shared across all instances)
+        if NOTIFICATIONS_AVAILABLE and config.FEATURES.get('whatsapp_notifications'):
+            self._initialize_notifications()
+
+    @classmethod
+    def _initialize_notifications(cls):
+        """Initialize shared notification system"""
+        if cls._notification_handler_initialized:
+            return
+
+        try:
+            # Initialize WhatsApp manager
+            cls._whatsapp_manager = WhatsAppManager(
+                provider=config.WHATSAPP_PROVIDER,
+                mock_mode=config.WHATSAPP_MOCK_MODE
+            )
+
+            # Initialize notification queue
+            cls._notification_queue = NotificationQueue(
+                worker_threads=config.NOTIFICATION_QUEUE_WORKERS,
+                persist=config.NOTIFICATION_PERSIST_QUEUE
+            )
+
+            # Set notification handler
+            cls._notification_queue.set_handler(cls._handle_notification)
+
+            # Start workers
+            cls._notification_queue.start_workers()
+
+            cls._notification_handler_initialized = True
+            print("✅ WhatsApp notification system initialized")
+        except Exception as e:
+            print(f"⚠️ Failed to initialize notifications: {e}")
+
+    @classmethod
+    def _handle_notification(cls, notification: Notification) -> Dict:
+        """Handle notification delivery (called by queue workers)"""
+        try:
+            notif_type = notification.type
+            data = notification.data
+
+            if notif_type == NotificationType.POINTS_EARNED:
+                return cls._whatsapp_manager.send_points_earned(
+                    customer_phone=notification.customer_phone,
+                    merchant_name=notification.merchant_name,
+                    points=data['points'],
+                    balance=data['balance'],
+                    tier=data['tier'],
+                    language=notification.language
+                )
+
+            elif notif_type == NotificationType.TIER_UPGRADE:
+                return cls._whatsapp_manager.send_tier_upgrade(
+                    customer_phone=notification.customer_phone,
+                    merchant_name=notification.merchant_name,
+                    new_tier=data['new_tier'],
+                    multiplier=data['multiplier'],
+                    balance=data['balance'],
+                    language=notification.language
+                )
+
+            elif notif_type == NotificationType.POINTS_REDEEMED:
+                return cls._whatsapp_manager.send_points_redeemed(
+                    customer_phone=notification.customer_phone,
+                    merchant_name=notification.merchant_name,
+                    points=data['points'],
+                    value=data['value'],
+                    balance=data['balance'],
+                    language=notification.language
+                )
+
+            elif notif_type == NotificationType.BALANCE_INQUIRY:
+                return cls._whatsapp_manager.send_balance_inquiry(
+                    customer_phone=notification.customer_phone,
+                    merchant_name=notification.merchant_name,
+                    points=data['points'],
+                    value=data['value'],
+                    tier=data['tier'],
+                    language=notification.language
+                )
+
+            elif notif_type == NotificationType.REFERRAL_REWARD:
+                return cls._whatsapp_manager.send_referral_reward(
+                    customer_phone=notification.customer_phone,
+                    merchant_name=notification.merchant_name,
+                    referrer_name=data['referrer_name'],
+                    bonus=data['bonus'],
+                    balance=data['balance'],
+                    language=notification.language
+                )
+
+            elif notif_type == NotificationType.WELCOME:
+                return cls._whatsapp_manager.send_welcome(
+                    customer_phone=notification.customer_phone,
+                    merchant_name=notification.merchant_name,
+                    customer_name=data['customer_name'],
+                    language=notification.language
+                )
+
+            else:
+                return {'success': False, 'error': f'Unknown notification type: {notif_type}'}
+
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def _send_notification(self, notification: Notification):
+        """Queue a notification for delivery"""
+        if self._notification_queue and config.FEATURES.get('whatsapp_notifications'):
+            try:
+                self._notification_queue.enqueue(notification)
+            except Exception as e:
+                print(f"⚠️ Failed to queue notification: {e}")
 
     def process_purchase(self, customer_phone: str, amount: float,
                         description: str = '', metadata: Dict = None) -> Dict:
@@ -496,6 +646,32 @@ class PaybackEngine:
             metadata={'points_breakdown': points_breakdown}
         )
 
+        # Send notifications
+        tier_upgraded = (new_tier != tier)
+
+        # 1. Points earned notification
+        self._send_notification(create_points_earned_notification(
+            customer_phone=customer_phone,
+            merchant_id=self.merchant_id,
+            merchant_name=metadata.get('merchant_name', 'LocalKard Merchant') if metadata else 'LocalKard Merchant',
+            points=points_earned,
+            balance=new_balance,
+            tier=new_tier,
+            language=metadata.get('language', config.NOTIFICATION_LANGUAGE) if metadata else config.NOTIFICATION_LANGUAGE
+        ))
+
+        # 2. Tier upgrade notification (if upgraded)
+        if tier_upgraded:
+            self._send_notification(create_tier_upgrade_notification(
+                customer_phone=customer_phone,
+                merchant_id=self.merchant_id,
+                merchant_name=metadata.get('merchant_name', 'LocalKard Merchant') if metadata else 'LocalKard Merchant',
+                new_tier=new_tier,
+                multiplier=self.points_engine.TIER_MULTIPLIERS.get(new_tier, 1.0),
+                balance=new_balance,
+                language=metadata.get('language', config.NOTIFICATION_LANGUAGE) if metadata else config.NOTIFICATION_LANGUAGE
+            ))
+
         return {
             'success': True,
             'transaction_id': transaction['transaction_id'],
@@ -506,7 +682,7 @@ class PaybackEngine:
             'points_breakdown': points_breakdown,
             'new_balance': new_balance,
             'lifetime_points': new_lifetime,
-            'tier_upgraded': new_tier != tier
+            'tier_upgraded': tier_upgraded
         }
 
     def get_customer_summary(self, customer_phone: str) -> Dict:

@@ -1,0 +1,115 @@
+[
+  {
+    "timestamp": "2026-08-21T12:05:17.688342",
+    "to_phone": "9876543210",
+    "template_name": "points_earned",
+    "message_length": 116,
+    "result": {
+      "success": true,
+      "message_id": "MOCK_20260821120517",
+      "status": "queued",
+      "to": "whatsapp:+919876543210",
+      "provider": "twilio_mock",
+      "timestamp": "2026-08-21T12:05:17.688320"
+    },
+    "metadata": {
+      "points": 50,
+      "balance": 250,
+      "tier": "silver"
+    }
+  },
+  {
+    "timestamp": "2026-08-21T12:05:17.688637",
+    "to_phone": "9876543210",
+    "template_name": "points_earned",
+    "message_length": 107,
+    "result": {
+      "success": true,
+      "message_id": "MOCK_20260821120517",
+      "status": "queued",
+      "to": "whatsapp:+919876543210",
+      "provider": "twilio_mock",
+      "timestamp": "2026-08-21T12:05:17.688569"
+    },
+    "metadata": {
+      "points": 50,
+      "balance": 250,
+      "tier": "silver"
+    }
+  },
+  {
+    "timestamp": "2026-08-21T12:05:17.688890",
+    "to_phone": "9876543210",
+    "template_name": "tier_upgrade",
+    "message_length": 159,
+    "result": {
+      "success": true,
+      "message_id": "MOCK_20260821120517",
+      "status": "queued",
+      "to": "whatsapp:+919876543210",
+      "provider": "twilio_mock",
+      "timestamp": "2026-08-21T12:05:17.688842"
+    },
+    "metadata": {
+      "tier": "gold",
+      "multiplier": 1.5
+    }
+  },
+  {
+    "timestamp": "2026-08-21T12:05:17.690126",
+    "to_phone": "9876543210",
+    "template_name": "points_redeemed",
+    "message_length": 101,
+    "result": {
+      "success": true,
+      "message_id": "MOCK_20260821120517",
+      "status": "queued",
+      "to": "whatsapp:+919876543210",
+      "provider": "twilio_mock",
+      "timestamp": "2026-08-21T12:05:17.690052"
+    },
+    "metadata": {
+      "points": 100,
+      "value": 10,
+      "balance": 150
+    }
+  },
+  {
+    "timestamp": "2026-08-21T12:05:20.805008",
+    "to_phone": "9876543210",
+    "template_name": "points_earned",
+    "message_length": 114,
+    "result": {
+      "success": true,
+      "message_id": "MOCK_20260821120520",
+      "status": "queued",
+      "to": "whatsapp:+919876543210",
+      "provider": "twilio_mock",
+      "timestamp": "2026-08-21T12:05:20.804852"
+    },
+    "metadata": {
+      "points": 25.0,
+      "balance": 25.0,
+      "tier": "bronze"
+    }
+  },
+  {
+    "timestamp": "2026-08-21T12:05:22.805672",
+    "to_phone": "9999999999",
+    "template_name": "points_earned",
+    "message_length": 106,
+    "result": {
+      "success": true,
+      "message_id": "MOCK_20260821120522",
+      "status": "queued",
+      "to": "whatsapp:+919999999999",
+      "provider": "twilio_mock",
+      "timestamp": "2026-08-21T12:05:22.805443"
+    },
+    "metadata": {
+      "points": 50.0,
+      "balance": 50.0,
+      "tier": "bronze"
+    }
+  }
+]

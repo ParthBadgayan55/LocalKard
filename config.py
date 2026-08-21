@@ -136,12 +136,33 @@ TIER_COLORS = {
 }
 
 # ============================================================================
-# NOTIFICATION CONFIGURATION (For future use)
+# NOTIFICATION CONFIGURATION
 # ============================================================================
 
-# SMS/WhatsApp settings (placeholder)
+# SMS/WhatsApp settings
 SMS_ENABLED = False
-WHATSAPP_ENABLED = False
+WHATSAPP_ENABLED = True  # Enable WhatsApp notifications
+WHATSAPP_PROVIDER = 'twilio'  # 'twilio' or 'wati'
+WHATSAPP_MOCK_MODE = True  # Set False to use real API (requires credentials)
+
+# WhatsApp API Credentials (set via environment variables)
+# For Twilio:
+#   TWILIO_ACCOUNT_SID
+#   TWILIO_AUTH_TOKEN
+#   TWILIO_WHATSAPP_NUMBER (e.g., 'whatsapp:+14155238886')
+#
+# For WATI.io:
+#   WATI_API_KEY
+#   WATI_API_URL
+
+# Notification preferences
+NOTIFICATION_LANGUAGE = 'en'  # Default: 'en' or 'hi'
+NOTIFICATION_QUEUE_WORKERS = 2  # Number of background workers
+NOTIFICATION_MAX_RETRIES = 3  # Max retry attempts for failed notifications
+NOTIFICATION_PERSIST_QUEUE = True  # Persist queue to disk
+
+# Rate limiting (messages per hour per customer)
+NOTIFICATION_RATE_LIMIT = 10
 
 # Email settings (placeholder)
 EMAIL_ENABLED = False
@@ -180,11 +201,11 @@ DATA_RETENTION_DAYS = 2555  # 7 years
 
 # Enable/disable features
 FEATURES = {
-    'customer_portal': False,     # TODO: Build customer portal
-    'redemption_flow': False,     # TODO: Implement redemption
+    'customer_portal': True,      # ✅ COMPLETE: Full customer portal built
+    'redemption_flow': True,      # ✅ COMPLETE: Points redemption implemented
     'sms_notifications': False,   # TODO: Add SMS integration
-    'whatsapp_notifications': False,  # TODO: Add WhatsApp
-    'referral_program': False,    # TODO: Build referrals
+    'whatsapp_notifications': True,   # ✅ WhatsApp notifications enabled
+    'referral_program': True,     # ✅ COMPLETE: Referral system with codes
     'campaigns': False,           # TODO: Campaign management
     'multi_currency': False,      # Only INR for now
     'coalition_network': False,   # Disabled (no license yet)

@@ -1,0 +1,42 @@
+[
+  {
+    "localkard_id": "LK00000001",
+    "phone": "9876543210",
+    "name": "Test Customer",
+    "email": "customer@localkard.com",
+    "points_balance": 25.0,
+    "lifetime_points": 25.0,
+    "tier": "bronze",
+    "tier_progress": 0,
+    "created_at": "2026-08-21 12:04:39",
+    "created_by_merchant": "CUSTOMER_PORTAL",
+    "linked_merchants": [
+      "CUSTOMER_PORTAL"
+    ],
+    "preferences": {},
+    "tags": [],
+    "last_transaction": "2026-08-21 12:04:39",
+    "transaction_count": 1,
+    "metadata": {}
+  },
+  {
+    "localkard_id": "LK00000002",
+    "phone": "9999999999",
+    "name": "Test Customer",
+    "email": "test@example.com",
+    "points_balance": 50.0,
+    "lifetime_points": 50.0,
+    "tier": "bronze",
+    "tier_progress": 0,
+    "created_at": "2026-08-21 12:05:20",
+    "created_by_merchant": "M001",
+    "linked_merchants": [
+      "M001"
+    ],
+    "preferences": {},
+    "tags": [],
+    "last_transaction": "2026-08-21 12:05:21",
+    "transaction_count": 1,
+    "metadata": {}
+  }
+]

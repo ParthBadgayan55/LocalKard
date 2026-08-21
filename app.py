@@ -11,7 +11,8 @@ try:
         PaybackEngine,
         CentralCustomerDB,
         TransactionEngine,
-        PointsEngine
+        PointsEngine,
+        RedemptionEngine
     )
     PAYBACK_BACKEND_AVAILABLE = True
 except ImportError:
@@ -1067,6 +1068,9 @@ def merchant_login_page():
 
 # Customer Login
 def customer_login_page():
+    """Enhanced Customer Login with Security"""
+    import security
+
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1.2, 1, 1.2])
@@ -1075,26 +1079,43 @@ def customer_login_page():
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Customer Portal</div>', unsafe_allow_html=True)
 
-        phone = st.text_input("Username / Phone Number", placeholder="Enter username or phone", key="customer_phone")
+        st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; text-align: center; margin-bottom: 1.5rem;">Track your points, redeem rewards, and more!</div>', unsafe_allow_html=True)
+
+        phone = st.text_input("Phone Number", placeholder="Enter your 10-digit phone", key="customer_phone", max_chars=10)
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="customer_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
-        if st.button("Sign In", key="customer_login_btn", use_container_width=True):
+        if st.button("🔓 Sign In", key="customer_login_btn", use_container_width=True):
             # Reload customers to get latest data
             current_customers = load_customers()
-            if phone in current_customers and current_customers[phone]["password"] == password:
-                st.session_state.logged_in = True
-                st.session_state.user_type = 'customer'
-                st.session_state.current_user = current_customers[phone]
-                st.session_state.page = 'customer_dashboard'
-                st.rerun()
+
+            if phone in current_customers:
+                stored_password = current_customers[phone]["password"]
+
+                # Check if password is hashed (new format) or plain text (old format)
+                if stored_password.startswith('$2b$'):
+                    # Hashed password - use bcrypt verification
+                    password_valid = security.verify_password(password, stored_password)
+                else:
+                    # Plain text password (legacy) - direct comparison
+                    password_valid = (password == stored_password)
+
+                if password_valid:
+                    st.session_state.logged_in = True
+                    st.session_state.user_type = 'customer'
+                    st.session_state.current_user = current_customers[phone]
+                    st.session_state.page = 'customer_dashboard'
+                    st.success("✓ Login successful!")
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid password")
             else:
-                st.error("Invalid credentials")
+                st.error("❌ Account not found. Please check your phone number or sign up.")
 
         st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
 
-        if st.button("Back", key="back_customer", use_container_width=True):
+        if st.button("← Back", key="back_customer", use_container_width=True):
             st.session_state.page = 'landing'
             st.rerun()
 
@@ -1107,7 +1128,7 @@ def customer_login_page():
         </div>
         """, unsafe_allow_html=True)
 
-        if st.button("Create Customer Account", key="customer_signup_link", use_container_width=True):
+        if st.button("✨ Create Customer Account", key="customer_signup_link", use_container_width=True):
             st.session_state.page = 'customer_signup'
             st.rerun()
 
@@ -1273,7 +1294,7 @@ def merchant_dashboard():
     elif menu == "💎 Loyalty":
         st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>💎 Loyalty Program Management</h1>", unsafe_allow_html=True)
 
-        tab1, tab2, tab3, tab4 = st.tabs(["💳 Record Sale", "⚙️ Points Rules", "🎁 Rewards & Tiers", "📊 Program Analytics"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["💳 Record Sale", "🎁 Redeem Points", "⚙️ Points Rules", "🏆 Rewards & Tiers", "📊 Program Analytics"])
 
         with tab1:
             st.markdown("### 💳 Record Customer Purchase")
@@ -1441,7 +1462,290 @@ def merchant_dashboard():
                 st.info("The Payback-style backend provides:\n- Central customer database\n- Transaction audit trail\n- Complex points calculation\n- Fraud detection\n- Settlement tracking")
 
         with tab2:
-            st.markdown("### Points Earning Rules")
+            st.markdown("### 🎁 Redeem Points")
+            st.markdown("Process customer point redemption for discounts")
+
+            st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+
+            if PAYBACK_BACKEND_AVAILABLE:
+                # Initialize session state for redemption flow
+                if 'redemption_customer' not in st.session_state:
+                    st.session_state.redemption_customer = None
+                if 'redemption_step' not in st.session_state:
+                    st.session_state.redemption_step = 'lookup'  # 'lookup' or 'redeem'
+
+                # Step 1: Customer Lookup
+                st.markdown("#### 🔍 Step 1: Lookup Customer")
+
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    lookup_phone = st.text_input(
+                        "Customer Phone Number",
+                        placeholder="9876543210",
+                        help="10-digit phone number",
+                        key="redemption_lookup_phone"
+                    )
+                with col2:
+                    st.markdown("<div style='margin-top: 1.8rem;'></div>", unsafe_allow_html=True)
+                    if st.button("🔍 Lookup Customer", use_container_width=True, type="primary"):
+                        if lookup_phone and len(lookup_phone) == 10:
+                            try:
+                                customer_db = CentralCustomerDB()
+                                customer = customer_db.get_customer_by_phone(lookup_phone)
+
+                                if customer:
+                                    st.session_state.redemption_customer = customer
+                                    st.session_state.redemption_step = 'redeem'
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Customer not found. Please ensure they have made at least one purchase first.")
+                            except Exception as e:
+                                st.error(f"Error looking up customer: {str(e)}")
+                        else:
+                            st.error("Please enter a valid 10-digit phone number")
+
+                # Step 2: Show Customer Info & Redemption Form
+                if st.session_state.redemption_step == 'redeem' and st.session_state.redemption_customer:
+                    customer = st.session_state.redemption_customer
+
+                    st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+                    # Customer Info Card
+                    tier = customer.get('tier', 'bronze')
+                    tier_info = LOYALTY_TIERS[tier]
+                    points_balance = customer.get('points_balance', 0)
+
+                    # Calculate redemption value
+                    points_engine = PointsEngine(merchant_phone)
+                    redemption_value = points_engine.calculate_redemption_value(points_balance)
+
+                    st.markdown(f"""
+                    <div class='premium-card' style='background: linear-gradient(135deg, {MD_COLORS['info']} 0%, {MD_COLORS['primary']} 100%); color: white; padding: 2rem; margin-bottom: 2rem;'>
+                        <h3 style='color: white; margin: 0 0 1rem 0;'>✅ Customer Found</h3>
+                        <div style='display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;'>
+                            <div>
+                                <div style='font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.3rem;'>Customer Name</div>
+                                <div style='font-size: 1.3rem; font-weight: 700;'>{customer.get('name', 'N/A')}</div>
+                                <div style='font-size: 0.8rem; opacity: 0.8; margin-top: 0.2rem;'>ID: {customer.get('localkard_id', 'N/A')}</div>
+                            </div>
+                            <div>
+                                <div style='font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.3rem;'>Points Balance</div>
+                                <div style='font-size: 2rem; font-weight: 800;'>{points_balance:,.1f}</div>
+                                <div style='font-size: 0.8rem; opacity: 0.8; margin-top: 0.2rem;'>Worth ₹{redemption_value:.2f}</div>
+                            </div>
+                            <div>
+                                <div style='font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.3rem;'>Current Tier</div>
+                                <div class='tier-badge' style='background: {tier_info["color"]}; color: white; display: inline-block; margin-top: 0.5rem;'>
+                                    {tier_info["name"].upper()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    # Redemption Form
+                    if points_balance > 0:
+                        st.markdown("#### 💰 Step 2: Process Redemption")
+
+                        with st.form("redemption_form"):
+                            col1, col2 = st.columns(2)
+
+                            with col1:
+                                purchase_amount = st.number_input(
+                                    "Purchase Amount (₹) *",
+                                    min_value=1.0,
+                                    step=10.0,
+                                    value=100.0,
+                                    help="Total purchase amount before discount"
+                                )
+
+                            with col2:
+                                max_points = min(points_balance, purchase_amount / (loyalty_config['redemption_rate']['value'] / loyalty_config['redemption_rate']['points']))
+                                points_to_redeem = st.number_input(
+                                    "Points to Redeem *",
+                                    min_value=0.0,
+                                    max_value=float(points_balance),
+                                    step=10.0,
+                                    value=min(100.0, float(points_balance)),
+                                    help=f"Maximum: {points_balance:,.1f} points"
+                                )
+
+                            # Calculate discount preview
+                            if points_to_redeem > 0:
+                                discount_preview = points_engine.calculate_redemption_value(points_to_redeem)
+                                discount_preview = min(discount_preview, purchase_amount)  # Cap at purchase amount
+                                final_amount = purchase_amount - discount_preview
+                                new_balance_preview = points_balance - points_to_redeem
+
+                                st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+
+                                # Preview Card
+                                st.markdown(f"""
+                                <div class='premium-card' style='background: {MD_COLORS['light_bg']}; border-left: 4px solid {MD_COLORS['success']};'>
+                                    <h4 style='color: {MD_COLORS['text_dark']}; margin: 0 0 1rem 0;'>📊 Redemption Preview</h4>
+                                    <table style='width: 100%; border-collapse: collapse;'>
+                                        <tr style='border-bottom: 1px solid {MD_COLORS["border"]}'>
+                                            <td style='padding: 0.6rem 0; color: {MD_COLORS["text_muted"]};'>Purchase Amount:</td>
+                                            <td style='padding: 0.6rem 0; text-align: right; font-weight: 600; color: {MD_COLORS["text_dark"]};'>₹{purchase_amount:.2f}</td>
+                                        </tr>
+                                        <tr style='border-bottom: 1px solid {MD_COLORS["border"]}'>
+                                            <td style='padding: 0.6rem 0; color: {MD_COLORS["text_muted"]};'>Points to Redeem:</td>
+                                            <td style='padding: 0.6rem 0; text-align: right; font-weight: 600; color: {MD_COLORS["primary"]};'>{points_to_redeem:,.1f} points</td>
+                                        </tr>
+                                        <tr style='border-bottom: 1px solid {MD_COLORS["border"]}'>
+                                            <td style='padding: 0.6rem 0; color: {MD_COLORS["success"]};'>Discount Value:</td>
+                                            <td style='padding: 0.6rem 0; text-align: right; font-weight: 700; color: {MD_COLORS["success"]}; font-size: 1.1rem;'>- ₹{discount_preview:.2f}</td>
+                                        </tr>
+                                        <tr style='border-bottom: 2px solid {MD_COLORS["border"]}'>
+                                            <td style='padding: 0.6rem 0; font-weight: 700; color: {MD_COLORS["text_dark"]};'>Final Amount:</td>
+                                            <td style='padding: 0.6rem 0; text-align: right; font-weight: 800; color: {MD_COLORS["primary"]}; font-size: 1.3rem;'>₹{final_amount:.2f}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding: 0.6rem 0; color: {MD_COLORS["text_muted"]};'>New Points Balance:</td>
+                                            <td style='padding: 0.6rem 0; text-align: right; font-weight: 600; color: {MD_COLORS["info"]};'>{new_balance_preview:,.1f} points</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                """, unsafe_allow_html=True)
+
+                            st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                submit_redeem = st.form_submit_button("✅ Confirm Redemption", use_container_width=True, type="primary")
+                            with col2:
+                                if st.form_submit_button("❌ Cancel", use_container_width=True):
+                                    st.session_state.redemption_customer = None
+                                    st.session_state.redemption_step = 'lookup'
+                                    st.rerun()
+
+                        # Process Redemption
+                        if submit_redeem:
+                            if points_to_redeem <= 0:
+                                st.error("Please enter points to redeem")
+                            elif points_to_redeem > points_balance:
+                                st.error(f"Insufficient balance. Customer has only {points_balance:,.1f} points")
+                            elif purchase_amount <= 0:
+                                st.error("Please enter a valid purchase amount")
+                            else:
+                                try:
+                                    # Process redemption
+                                    redemption_engine = RedemptionEngine()
+                                    result = redemption_engine.redeem_points(
+                                        customer_id=customer['localkard_id'],
+                                        merchant_id=merchant_phone,
+                                        points_to_redeem=points_to_redeem,
+                                        purchase_amount=purchase_amount
+                                    )
+
+                                    if result['success']:
+                                        st.balloons()
+
+                                        # Success Card
+                                        st.markdown(f"""
+                                        <div class='premium-card' style='background: linear-gradient(135deg, {MD_COLORS['success']} 0%, {MD_COLORS['info']} 100%); color: white; padding: 2rem; margin-top: 1.5rem;'>
+                                            <h2 style='color: white; margin: 0 0 1rem 0;'>✅ Redemption Successful!</h2>
+                                            <div style='font-size: 1.1rem; margin-bottom: 0.5rem;'>
+                                                <strong>Transaction ID:</strong> {result['transaction_id']}
+                                            </div>
+                                            <div style='font-size: 1.1rem; margin-bottom: 0.5rem;'>
+                                                <strong>Customer:</strong> {customer['name']} ({customer['localkard_id']})
+                                            </div>
+                                        </div>
+                                        """, unsafe_allow_html=True)
+
+                                        st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+
+                                        # Results Metrics
+                                        col1, col2, col3, col4 = st.columns(4)
+                                        with col1:
+                                            st.metric("💎 Points Redeemed", f"{result['points_redeemed']:,.1f}")
+                                        with col2:
+                                            st.metric("💰 Discount Given", f"₹{result['discount_value']:.2f}")
+                                        with col3:
+                                            st.metric("📊 New Balance", f"{result['new_balance']:,.1f}")
+                                        with col4:
+                                            st.metric("🎟️ Transaction ID", result['transaction_id'][-6:], help="Last 6 digits")
+
+                                        # Reset form
+                                        st.session_state.redemption_customer = None
+                                        st.session_state.redemption_step = 'lookup'
+
+                                        st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+                                        if st.button("🔄 Process Another Redemption", use_container_width=True):
+                                            st.rerun()
+
+                                    else:
+                                        st.error(f"❌ Redemption failed: {result.get('error', 'Unknown error')}")
+
+                                except Exception as e:
+                                    st.error(f"❌ Error processing redemption: {str(e)}")
+                                    st.exception(e)
+
+                    else:
+                        st.warning("⚠️ Customer has no points to redeem.")
+                        if st.button("← Back to Lookup", use_container_width=True):
+                            st.session_state.redemption_customer = None
+                            st.session_state.redemption_step = 'lookup'
+                            st.rerun()
+
+                # Redemption History Section
+                st.markdown("<div style='margin: 3rem 0 1.5rem 0;'></div>", unsafe_allow_html=True)
+                st.markdown("### 📜 Recent Redemptions")
+
+                try:
+                    transaction_engine = TransactionEngine()
+                    merchant_txns = transaction_engine.get_merchant_transactions(merchant_phone, limit=20)
+                    redemption_txns = [t for t in merchant_txns if t.get('type') == 'redeem']
+
+                    if redemption_txns:
+                        st.markdown(f"**Showing {len(redemption_txns)} recent redemptions**")
+
+                        for txn in redemption_txns:
+                            # Get customer info
+                            customer_db = CentralCustomerDB()
+                            txn_customer = customer_db.get_customer_by_id(txn.get('customer_id', ''))
+                            customer_name = txn_customer.get('name', 'Unknown') if txn_customer else 'Unknown'
+
+                            points_redeemed = abs(txn.get('points', 0))
+                            amount = txn.get('amount', 0)
+
+                            st.markdown(f"""
+                            <div style='padding: 1rem; background: white; border-left: 4px solid {MD_COLORS['danger']}; margin-bottom: 0.8rem; border-radius: 8px; border: 1px solid {MD_COLORS['border']};'>
+                                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                                    <div style='flex: 1;'>
+                                        <div style='font-weight: 600; color: {MD_COLORS["text_dark"]}; margin-bottom: 0.3rem;'>
+                                            {customer_name} • {txn.get('customer_id', 'N/A')}
+                                        </div>
+                                        <div style='font-size: 0.85rem; color: {MD_COLORS["text_muted"]};'>
+                                            {txn.get('description', 'Redemption')}
+                                        </div>
+                                        <div style='font-size: 0.75rem; color: {MD_COLORS["text_muted"]}; margin-top: 0.3rem;'>
+                                            {txn.get('timestamp', 'N/A')} • {txn.get('transaction_id', 'N/A')}
+                                        </div>
+                                    </div>
+                                    <div style='text-align: right;'>
+                                        <div style='font-size: 1.3rem; font-weight: 700; color: {MD_COLORS["danger"]};'>
+                                            -{points_redeemed:,.1f} pts
+                                        </div>
+                                        <div style='font-size: 0.85rem; color: {MD_COLORS["text_muted"]};'>
+                                            Purchase: ₹{amount:.0f}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                    else:
+                        st.info("📊 No redemptions yet. Redemption history will appear here.")
+
+                except Exception as e:
+                    st.error(f"Could not load redemption history: {str(e)}")
+
+            else:
+                st.error("⚠️ Payback backend not available. Make sure payback_engine.py is present.")
+
+        with tab3:
+            st.markdown("### ⚙️ Points Earning Rules")
 
             col1, col2 = st.columns(2)
             with col1:
@@ -1487,7 +1791,7 @@ def merchant_dashboard():
                 st.success("✓ Configuration saved successfully!")
                 st.balloons()
 
-        with tab2:
+        with tab4:
             st.markdown("### 🏆 Loyalty Tiers & Benefits")
 
             for tier_key, tier_info in LOYALTY_TIERS.items():
@@ -1514,8 +1818,8 @@ def merchant_dashboard():
                 </div>
                 """, unsafe_allow_html=True)
 
-        with tab3:
-            st.markdown("### Program Performance")
+        with tab5:
+            st.markdown("### 📊 Program Performance")
 
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -1683,49 +1987,707 @@ def merchant_dashboard():
         else:
             st.info("📊 Analytics will populate as you add customers and transactions")
 def customer_dashboard():
+    """Complete Customer Portal with Loyalty Features"""
+    import hashlib
+
+    customer_data = st.session_state.current_user
+    customer_phone = customer_data['phone']
+
+    # Custom CSS for customer portal
     st.markdown(f"""
-    <div class="dashboard-header">
-        <div class="dashboard-title">Welcome, {st.session_state.current_user['name']}</div>
-        <div class="dashboard-subtitle">Discover local shops</div>
+    <style>
+        .customer-header {{
+            background: linear-gradient(135deg, {MD_COLORS['primary']} 0%, {MD_COLORS['purple']} 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }}
+        .points-card {{
+            background: linear-gradient(135deg, {MD_COLORS['gold']} 0%, {MD_COLORS['warning']} 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        }}
+        .tier-card {{
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 4px solid {MD_COLORS['primary']};
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }}
+        .transaction-card {{
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            border-left: 3px solid {MD_COLORS['success']};
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }}
+        .redeem-card {{
+            background: linear-gradient(135deg, {MD_COLORS['success']} 0%, {MD_COLORS['info']} 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }}
+        .referral-card {{
+            background: linear-gradient(135deg, {MD_COLORS['purple']} 0%, {MD_COLORS['primary']} 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }}
+        .profile-card {{
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Get customer data from central database if available
+    if PAYBACK_BACKEND_AVAILABLE:
+        try:
+            customer_db = CentralCustomerDB()
+            central_customer = customer_db.get_customer_by_phone(customer_phone)
+
+            # If customer doesn't exist in central DB, create them
+            if not central_customer:
+                central_customer = customer_db.create_customer(
+                    phone=customer_phone,
+                    name=customer_data.get('name', 'Customer'),
+                    email=customer_data.get('email', ''),
+                    merchant_id='CUSTOMER_PORTAL'
+                )
+        except:
+            central_customer = None
+    else:
+        central_customer = None
+
+    # Header with customer info
+    if central_customer:
+        points_balance = central_customer.get('points_balance', 0)
+        tier = central_customer.get('tier', 'bronze')
+        localkard_id = central_customer.get('localkard_id', 'N/A')
+        lifetime_points = central_customer.get('lifetime_points', 0)
+    else:
+        points_balance = 0
+        tier = 'bronze'
+        localkard_id = 'N/A'
+        lifetime_points = 0
+
+    tier_info = LOYALTY_TIERS.get(tier, LOYALTY_TIERS['bronze'])
+
+    # Top navigation bar
+    st.markdown(f"""
+    <div class='customer-header'>
+        <div style='display: flex; justify-content: space-between; align-items: center;'>
+            <div>
+                <div style='color: white; font-size: 2rem; font-weight: 800;'>
+                    Welcome back, {customer_data['name']}! 👋
+                </div>
+                <div style='color: rgba(255,255,255,0.9); font-size: 0.95rem; margin-top: 0.5rem;'>
+                    LocalKard ID: {localkard_id}
+                </div>
+            </div>
+            <div>
+                <span class='tier-badge' style='background: {tier_info["color"]}; color: white; padding: 0.7rem 1.5rem; font-size: 1rem;'>
+                    {tier_info["name"].upper()}
+                </span>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("Logout", key="customer_logout"):
+    # Sidebar navigation
+    menu = st.sidebar.radio(
+        "Navigation",
+        ["🏠 Dashboard", "🎁 Redeem Points", "📜 Transaction History", "🔗 Referrals", "👤 Profile"],
+        label_visibility="collapsed"
+    )
+
+    st.sidebar.markdown("<div style='margin: 2rem 0; border-top: 1px solid #E5E7EB;'></div>", unsafe_allow_html=True)
+
+    if st.sidebar.button("🚪 Logout", use_container_width=True, type="primary"):
         st.session_state.logged_in = False
         st.session_state.page = 'landing'
         st.rerun()
 
-    # Metrics
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Your Orders", "8", "")
-    with col2:
-        st.metric("Loyalty Points", "450", "+50")
-    with col3:
-        st.metric("Nearby Shops", "12", "")
+    # ==================================================================
+    # DASHBOARD PAGE
+    # ==================================================================
+    if menu == "🏠 Dashboard":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>💎 Your Loyalty Dashboard</h1>", unsafe_allow_html=True)
 
-    st.write("")
+        # Points balance - Big and prominent
+        col1, col2, col3 = st.columns([2, 1, 1])
 
-    # Tabs
-    tab1, tab2, tab3 = st.tabs(["🏪 Browse Shops", "📦 My Orders", "💳 Loyalty"])
+        with col1:
+            # Calculate redemption value
+            redemption_value = points_balance * 0.1  # Default: 100 points = ₹10
 
-    with tab1:
-        st.subheader("Nearby Shops")
-        shops_data = {
-            "Shop": ["Fresh Mart Grocery", "Pet Paradise"],
-            "Category": ["Grocery", "Pet Store"],
-            "Distance": ["0.5 km", "1.2 km"],
-            "Rating": ["⭐ 4.5", "⭐ 4.8"]
-        }
-        st.dataframe(pd.DataFrame(shops_data), use_container_width=True)
+            st.markdown(f"""
+            <div class='points-card'>
+                <div style='font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem; letter-spacing: 2px;'>YOUR POINTS BALANCE</div>
+                <div style='font-size: 4rem; font-weight: 900; margin: 0.5rem 0;'>{points_balance:,.0f}</div>
+                <div style='font-size: 1.2rem; opacity: 0.95;'>Worth ₹{redemption_value:,.2f}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    with tab2:
-        st.subheader("Your Orders")
-        st.write("View your order history")
+        with col2:
+            st.markdown(f"""
+            <div class='tier-card'>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.8rem; margin-bottom: 0.5rem;'>CURRENT TIER</div>
+                <span class='tier-badge' style='background: {tier_info["color"]}; color: white;'>
+                    {tier_info["name"].upper()}
+                </span>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.5rem; font-weight: 800; margin-top: 1rem;'>
+                    {tier_info["multiplier"]}x
+                </div>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.75rem;'>Points Multiplier</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    with tab3:
-        st.subheader("Loyalty Rewards")
-        st.write("Track your points and rewards")
+        with col3:
+            st.markdown(f"""
+            <div class='tier-card'>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.8rem; margin-bottom: 0.5rem;'>LIFETIME POINTS</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.8rem; font-weight: 800; margin: 0.5rem 0;'>
+                    {lifetime_points:,.0f}
+                </div>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.75rem;'>Total Earned</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+        # Tier progress
+        st.markdown(f"<h2 style='color: {MD_COLORS['text_dark']}; font-weight: 700; margin-bottom: 1rem;'>🏆 Tier Progress</h2>", unsafe_allow_html=True)
+
+        # Find next tier
+        tier_order = ['bronze', 'silver', 'gold', 'platinum']
+        current_tier_index = tier_order.index(tier)
+
+        if current_tier_index < len(tier_order) - 1:
+            next_tier = tier_order[current_tier_index + 1]
+            next_tier_info = LOYALTY_TIERS[next_tier]
+            points_needed = next_tier_info['min_points'] - lifetime_points
+            progress_pct = (lifetime_points / next_tier_info['min_points']) * 100
+
+            st.markdown(f"""
+            <div class='premium-card'>
+                <div style='margin-bottom: 1rem;'>
+                    <span style='color: {MD_COLORS['text_dark']}; font-weight: 600;'>Next Tier: </span>
+                    <span class='tier-badge' style='background: {next_tier_info["color"]}; color: white;'>
+                        {next_tier_info["name"].upper()}
+                    </span>
+                </div>
+                <div style='background: {MD_COLORS['light_bg']}; height: 30px; border-radius: 15px; overflow: hidden; margin: 1rem 0;'>
+                    <div style='background: linear-gradient(90deg, {MD_COLORS['primary']} 0%, {next_tier_info["color"]} 100%);
+                                height: 100%; width: {min(progress_pct, 100):.1f}%;
+                                display: flex; align-items: center; justify-content: center;
+                                color: white; font-weight: 700; font-size: 0.85rem;'>
+                        {progress_pct:.0f}%
+                    </div>
+                </div>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem;'>
+                    <strong>{points_needed:,.0f} more points</strong> to unlock {next_tier_info['multiplier']}x earnings!
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.success(f"🎉 Congratulations! You've reached the highest tier: **{tier_info['name'].upper()}**")
+
+        st.markdown("<div style='margin: 3rem 0;'></div>", unsafe_allow_html=True)
+
+        # Recent transactions
+        st.markdown(f"<h2 style='color: {MD_COLORS['text_dark']}; font-weight: 700; margin-bottom: 1rem;'>📜 Recent Transactions</h2>", unsafe_allow_html=True)
+
+        if PAYBACK_BACKEND_AVAILABLE and central_customer:
+            txn_engine = TransactionEngine()
+            transactions = txn_engine.get_customer_transactions(localkard_id, limit=5)
+
+            if transactions:
+                for txn in transactions:
+                    txn_type = txn.get('type', 'unknown')
+                    txn_color = MD_COLORS['success'] if txn_type == 'earn' else MD_COLORS['danger']
+                    points_sign = "+" if txn_type == 'earn' else "-"
+                    icon = "💰" if txn_type == 'earn' else "🎁"
+
+                    st.markdown(f"""
+                    <div class='transaction-card' style='border-left-color: {txn_color};'>
+                        <div style='display: flex; justify-content: space-between; align-items: center;'>
+                            <div style='flex: 1;'>
+                                <div style='color: {MD_COLORS['text_dark']}; font-weight: 600; font-size: 1rem;'>
+                                    {icon} {txn.get('description', 'Transaction')}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.8rem; margin-top: 0.3rem;'>
+                                    {txn.get('timestamp', 'N/A')}
+                                </div>
+                            </div>
+                            <div style='text-align: right;'>
+                                <div style='color: {txn_color}; font-size: 1.5rem; font-weight: 800;'>
+                                    {points_sign}{abs(txn.get('points', 0)):,.0f}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.8rem;'>
+                                    ₹{txn.get('amount', 0):.0f}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("🎯 Start shopping to earn your first points!")
+        else:
+            st.info("💡 Connect with merchants to start earning loyalty points")
+
+        # Quick actions
+        st.markdown("<div style='margin: 3rem 0;'></div>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='color: {MD_COLORS['text_dark']}; font-weight: 700; margin-bottom: 1rem;'>⚡ Quick Actions</h2>", unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("🎁 Redeem Points", use_container_width=True, type="primary"):
+                st.session_state.customer_menu = "🎁 Redeem Points"
+                st.rerun()
+        with col2:
+            if st.button("🔗 Refer Friends", use_container_width=True):
+                st.session_state.customer_menu = "🔗 Referrals"
+                st.rerun()
+        with col3:
+            if st.button("📜 View History", use_container_width=True):
+                st.session_state.customer_menu = "📜 Transaction History"
+                st.rerun()
+
+    # ==================================================================
+    # REDEEM POINTS PAGE
+    # ==================================================================
+    elif menu == "🎁 Redeem Points":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>🎁 Redeem Your Points</h1>", unsafe_allow_html=True)
+
+        # Current balance
+        redemption_value = points_balance * 0.1
+
+        st.markdown(f"""
+        <div class='redeem-card'>
+            <div style='font-size: 1rem; opacity: 0.9; margin-bottom: 0.5rem;'>AVAILABLE BALANCE</div>
+            <div style='font-size: 3rem; font-weight: 900; margin: 0.5rem 0;'>{points_balance:,.0f} Points</div>
+            <div style='font-size: 1.3rem; opacity: 0.95;'>= ₹{redemption_value:,.2f} in discounts</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+        if points_balance >= 100:
+            st.markdown("### 💳 Redemption Options")
+
+            # Show redemption options
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown(f"""
+                <div class='premium-card' style='text-align: center; padding: 2rem;'>
+                    <div style='font-size: 2.5rem; margin-bottom: 1rem;'>🛍️</div>
+                    <div style='color: {MD_COLORS['text_dark']}; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;'>
+                        In-Store Discount
+                    </div>
+                    <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem;'>
+                        Use at any participating merchant
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with col2:
+                st.markdown(f"""
+                <div class='premium-card' style='text-align: center; padding: 2rem;'>
+                    <div style='font-size: 2.5rem; margin-bottom: 1rem;'>🎯</div>
+                    <div style='color: {MD_COLORS['text_dark']}; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;'>
+                        Online Orders
+                    </div>
+                    <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem;'>
+                        Apply discount at checkout
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            # Redemption form
+            st.markdown("### Calculate Your Discount")
+
+            with st.form("redemption_form"):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    points_to_redeem = st.number_input(
+                        "Points to Redeem",
+                        min_value=100,
+                        max_value=int(points_balance),
+                        value=min(500, int(points_balance)),
+                        step=100,
+                        help="Minimum 100 points"
+                    )
+
+                with col2:
+                    discount_value = points_to_redeem * 0.1
+                    st.metric("Discount Value", f"₹{discount_value:.2f}")
+
+                st.markdown(f"""
+                <div style='background: {MD_COLORS['light_bg']}; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;'>
+                    <div style='color: {MD_COLORS['text_dark']}; font-weight: 600; margin-bottom: 0.5rem;'>💡 Redemption Summary</div>
+                    <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem;'>
+                        • Redeeming: <strong>{points_to_redeem:,.0f} points</strong><br>
+                        • Discount: <strong>₹{discount_value:.2f}</strong><br>
+                        • Remaining balance: <strong>{points_balance - points_to_redeem:,.0f} points</strong>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                merchant_phone = st.text_input(
+                    "Merchant Phone Number",
+                    placeholder="Enter merchant's 10-digit phone",
+                    help="Ask the merchant for their LocalKard number"
+                )
+
+                purchase_amount = st.number_input(
+                    "Purchase Amount (₹)",
+                    min_value=float(discount_value),
+                    value=float(discount_value),
+                    step=10.0,
+                    help="Total bill amount"
+                )
+
+                submit = st.form_submit_button("🎁 Redeem Points", use_container_width=True, type="primary")
+
+                if submit:
+                    if PAYBACK_BACKEND_AVAILABLE and central_customer and merchant_phone and len(merchant_phone) == 10:
+                        try:
+                            redemption_engine = RedemptionEngine()
+                            result = redemption_engine.redeem_points(
+                                customer_id=localkard_id,
+                                merchant_id=merchant_phone,
+                                points_to_redeem=points_to_redeem,
+                                purchase_amount=purchase_amount
+                            )
+
+                            if result['success']:
+                                st.balloons()
+                                st.success(f"🎉 Successfully redeemed {result['points_redeemed']:,.0f} points!")
+                                st.info(f"💰 Discount Applied: ₹{result['discount_value']:.2f}")
+                                st.info(f"📊 New Balance: {result['new_balance']:,.0f} points")
+                                st.markdown(f"**Transaction ID:** {result['transaction_id']}")
+
+                                # Show redemption code
+                                st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+                                st.markdown(f"""
+                                <div class='premium-card' style='background: {MD_COLORS['success']}; color: white; text-align: center; padding: 2rem;'>
+                                    <div style='font-size: 1rem; margin-bottom: 0.5rem;'>REDEMPTION CODE</div>
+                                    <div style='font-size: 2rem; font-weight: 800; letter-spacing: 3px;'>
+                                        {result['transaction_id']}
+                                    </div>
+                                    <div style='font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.9;'>
+                                        Show this to the merchant
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
+
+                                # Refresh after 3 seconds
+                                import time
+                                time.sleep(2)
+                                st.rerun()
+                            else:
+                                st.error(f"❌ Redemption failed: {result.get('error', 'Unknown error')}")
+                        except Exception as e:
+                            st.error(f"❌ Error: {str(e)}")
+                    else:
+                        st.error("Please provide valid merchant phone number (10 digits)")
+        else:
+            st.warning("🎯 You need at least 100 points to redeem. Keep shopping to earn more!")
+            st.info(f"💡 You need {100 - points_balance:.0f} more points to start redeeming")
+
+    # ==================================================================
+    # TRANSACTION HISTORY PAGE
+    # ==================================================================
+    elif menu == "📜 Transaction History":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>📜 Transaction History</h1>", unsafe_allow_html=True)
+
+        if PAYBACK_BACKEND_AVAILABLE and central_customer:
+            txn_engine = TransactionEngine()
+            all_transactions = txn_engine.get_customer_transactions(localkard_id)
+
+            if all_transactions:
+                # Filters
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    filter_type = st.selectbox(
+                        "Filter by Type",
+                        ["All", "Earned", "Redeemed"],
+                        key="txn_filter_type"
+                    )
+
+                with col2:
+                    st.metric("Total Transactions", len(all_transactions))
+
+                with col3:
+                    # Calculate totals
+                    total_earned = sum(t['points'] for t in all_transactions if t['type'] == 'earn')
+                    st.metric("Total Points Earned", f"{total_earned:,.0f}")
+
+                st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+                # Filter transactions
+                if filter_type == "Earned":
+                    filtered_txns = [t for t in all_transactions if t['type'] == 'earn']
+                elif filter_type == "Redeemed":
+                    filtered_txns = [t for t in all_transactions if t['type'] == 'redeem']
+                else:
+                    filtered_txns = all_transactions
+
+                # Display transactions in timeline
+                for idx, txn in enumerate(filtered_txns):
+                    txn_type = txn.get('type', 'unknown')
+                    txn_color = MD_COLORS['success'] if txn_type == 'earn' else MD_COLORS['danger']
+                    points_sign = "+" if txn_type == 'earn' else "-"
+                    icon = "💰" if txn_type == 'earn' else "🎁"
+
+                    st.markdown(f"""
+                    <div class='transaction-card' style='border-left-color: {txn_color};'>
+                        <div style='display: flex; justify-content: space-between; align-items: start;'>
+                            <div style='flex: 1;'>
+                                <div style='color: {MD_COLORS['text_dark']}; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem;'>
+                                    {icon} {txn.get('description', 'Transaction')}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem; margin-bottom: 0.3rem;'>
+                                    🕒 {txn.get('timestamp', 'N/A')}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.75rem;'>
+                                    ID: {txn.get('transaction_id', 'N/A')}
+                                </div>
+                            </div>
+                            <div style='text-align: right;'>
+                                <div style='color: {txn_color}; font-size: 2rem; font-weight: 900;'>
+                                    {points_sign}{abs(txn.get('points', 0)):,.0f}
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem;'>
+                                    ₹{txn.get('amount', 0):.0f}
+                                </div>
+                                <div style='background: {txn_color}; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-top: 0.5rem;'>
+                                    {txn_type.upper()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                # Export option
+                st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+                if st.button("📥 Export Transaction History (CSV)", use_container_width=True):
+                    import csv
+                    from io import StringIO
+
+                    output = StringIO()
+                    writer = csv.DictWriter(output, fieldnames=['timestamp', 'transaction_id', 'type', 'description', 'amount', 'points'])
+                    writer.writeheader()
+
+                    for txn in filtered_txns:
+                        writer.writerow({
+                            'timestamp': txn.get('timestamp', ''),
+                            'transaction_id': txn.get('transaction_id', ''),
+                            'type': txn.get('type', ''),
+                            'description': txn.get('description', ''),
+                            'amount': txn.get('amount', 0),
+                            'points': txn.get('points', 0)
+                        })
+
+                    st.download_button(
+                        label="Download CSV",
+                        data=output.getvalue(),
+                        file_name=f"localkard_transactions_{customer_phone}.csv",
+                        mime="text/csv"
+                    )
+            else:
+                st.info("🎯 No transactions yet. Start shopping to earn points!")
+        else:
+            st.warning("⚠️ Transaction history not available. Please ensure you're registered in the system.")
+
+    # ==================================================================
+    # REFERRALS PAGE
+    # ==================================================================
+    elif menu == "🔗 Referrals":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>🔗 Refer & Earn</h1>", unsafe_allow_html=True)
+
+        # Generate referral code (based on customer phone)
+        referral_code = hashlib.md5(customer_phone.encode()).hexdigest()[:8].upper()
+
+        st.markdown(f"""
+        <div class='referral-card'>
+            <div style='font-size: 1.1rem; margin-bottom: 0.5rem;'>YOUR REFERRAL CODE</div>
+            <div style='font-size: 3rem; font-weight: 900; letter-spacing: 5px; margin: 1rem 0;'>
+                {referral_code}
+            </div>
+            <div style='font-size: 1rem; opacity: 0.9;'>Share with friends to earn bonus points!</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+        # Referral rewards
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown(f"""
+            <div class='premium-card' style='text-align: center; padding: 2rem;'>
+                <div style='font-size: 3rem; margin-bottom: 1rem;'>🎁</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;'>
+                    50 Points
+                </div>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem;'>
+                    For every friend who joins
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown(f"""
+            <div class='premium-card' style='text-align: center; padding: 2rem;'>
+                <div style='font-size: 3rem; margin-bottom: 1rem;'>🎉</div>
+                <div style='color: {MD_COLORS['text_dark']}; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;'>
+                    50 Points
+                </div>
+                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.9rem;'>
+                    For your friend on signup
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+        # Share via WhatsApp
+        st.markdown("### 📱 Share Your Code")
+
+        whatsapp_message = f"Join LocalKard and get 50 bonus points! Use my referral code: {referral_code}. Download: https://localkard.com"
+        whatsapp_link = f"https://wa.me/?text={whatsapp_message.replace(' ', '%20')}"
+
+        st.markdown(f"""
+        <a href="{whatsapp_link}" target="_blank" style="text-decoration: none;">
+            <div style='background: #25D366; color: white; padding: 1rem 2rem; border-radius: 12px;
+                        text-align: center; font-weight: 700; font-size: 1.1rem; cursor: pointer;
+                        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);'>
+                📱 Share via WhatsApp
+            </div>
+        </a>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<div style='margin: 1.5rem 0;'></div>", unsafe_allow_html=True)
+
+        # Referral stats (placeholder)
+        st.markdown("### 📊 Your Referral Stats")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Friends Referred", "0", help="Total referrals")
+        with col2:
+            st.metric("Bonus Earned", "0 pts", help="From referrals")
+        with col3:
+            st.metric("Active Referrals", "0", help="Friends who made purchases")
+
+    # ==================================================================
+    # PROFILE PAGE
+    # ==================================================================
+    elif menu == "👤 Profile":
+        st.markdown(f"<h1 style='color: {MD_COLORS['text_dark']}; font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem;'>👤 Your Profile</h1>", unsafe_allow_html=True)
+
+        tab1, tab2, tab3 = st.tabs(["📋 Personal Info", "🔒 Security", "⚙️ Preferences"])
+
+        with tab1:
+            st.markdown("### Personal Information")
+
+            with st.form("profile_form"):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    name = st.text_input("Full Name", value=customer_data.get('name', ''))
+                    phone = st.text_input("Phone Number", value=customer_phone, disabled=True)
+
+                with col2:
+                    email = st.text_input("Email", value=customer_data.get('email', ''), placeholder="your@email.com")
+
+                    if central_customer:
+                        joined_date = central_customer.get('created_at', 'N/A')
+                        st.text_input("Member Since", value=joined_date, disabled=True)
+
+                st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+
+                if st.form_submit_button("💾 Save Changes", use_container_width=True):
+                    # Update customer data
+                    st.session_state.current_user['name'] = name
+                    st.session_state.current_user['email'] = email
+
+                    # Update in central DB if available
+                    if PAYBACK_BACKEND_AVAILABLE and central_customer:
+                        customer_db = CentralCustomerDB()
+                        customer_db.update_customer(localkard_id, {
+                            'name': name,
+                            'email': email
+                        })
+
+                    st.success("✓ Profile updated successfully!")
+                    st.rerun()
+
+        with tab2:
+            st.markdown("### Change Password")
+
+            with st.form("password_form"):
+                current_password = st.text_input("Current Password", type="password")
+                new_password = st.text_input("New Password", type="password")
+                confirm_new_password = st.text_input("Confirm New Password", type="password")
+
+                st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+
+                if st.form_submit_button("🔒 Update Password", use_container_width=True):
+                    if new_password == confirm_new_password:
+                        if len(new_password) >= 6:
+                            # Update password
+                            current_customers = load_customers()
+                            if customer_phone in current_customers:
+                                if current_customers[customer_phone]['password'] == current_password:
+                                    current_customers[customer_phone]['password'] = new_password
+                                    save_customers(current_customers)
+                                    st.success("✓ Password updated successfully!")
+                                else:
+                                    st.error("❌ Current password is incorrect")
+                            else:
+                                st.error("❌ Customer not found")
+                        else:
+                            st.error("❌ Password must be at least 6 characters")
+                    else:
+                        st.error("❌ Passwords do not match")
+
+        with tab3:
+            st.markdown("### Notification Preferences")
+
+            st.checkbox("📧 Email Notifications", value=True, help="Receive updates via email")
+            st.checkbox("📱 SMS Notifications", value=True, help="Receive updates via SMS")
+            st.checkbox("🔔 Push Notifications", value=True, help="Receive app notifications")
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            st.markdown("### Marketing Preferences")
+
+            st.checkbox("🎁 Promotional Offers", value=True, help="Receive special offers and promotions")
+            st.checkbox("🆕 New Features", value=True, help="Get notified about new features")
+            st.checkbox("📊 Monthly Summary", value=True, help="Receive monthly points summary")
+
+            st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
+
+            if st.button("💾 Save Preferences", use_container_width=True):
+                st.success("✓ Preferences saved successfully!")
 
 # Merchant Signup
 def merchant_signup_page():
@@ -1904,51 +2866,126 @@ def merchant_signup_page():
 
 # Customer Signup
 def customer_signup_page():
+    """Enhanced Customer Registration with Central DB Integration"""
+    import security
+
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1.2, 1, 1.2])
 
     with col2:
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
-        st.markdown('<div class="form-title">Customer Signup</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Join LocalKard</div>', unsafe_allow_html=True)
 
-        name = st.text_input("Full Name", placeholder="Enter your name", key="signup_name")
-        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="signup_customer_phone")
-        password = st.text_input("Password", type="password", placeholder="Create a password", key="signup_customer_password")
-        confirm_password = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="signup_customer_confirm_password")
+        st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; text-align: center; margin-bottom: 1.5rem;">Start earning loyalty points across all our partner stores!</div>', unsafe_allow_html=True)
+
+        name = st.text_input("Full Name *", placeholder="Enter your full name", key="signup_name")
+        phone = st.text_input("Phone Number *", placeholder="10-digit phone number", key="signup_customer_phone", max_chars=10)
+        email = st.text_input("Email (Optional)", placeholder="your@email.com", key="signup_customer_email")
+
+        st.markdown('<div style="color: #ffffff; font-size: 0.95rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem;">🔒 Create Password</div>', unsafe_allow_html=True)
+
+        password = st.text_input("Password *", type="password", placeholder="Min 8 characters", key="signup_customer_password")
+        confirm_password = st.text_input("Confirm Password *", type="password", placeholder="Re-enter password", key="signup_customer_confirm_password")
+
+        # Password requirements
+        st.markdown("""
+        <div style='color: #a0a0c0; font-size: 0.75rem; margin-top: 0.5rem; margin-bottom: 1rem;'>
+            Password must have: 8+ characters, uppercase, lowercase, and a number
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
-        if st.button("Create Account", key="customer_signup_btn", use_container_width=True):
+        if st.button("🎉 Create Account", key="customer_signup_btn", use_container_width=True):
+            # Validation
             if not all([name, phone, password, confirm_password]):
-                st.error("Please fill all fields")
+                st.error("❌ Please fill all required fields")
             elif password != confirm_password:
-                st.error("Passwords do not match")
+                st.error("❌ Passwords do not match")
             else:
-                # Load current customers
+                # Validate phone number
+                phone_valid, phone_error = security.validate_phone_number(phone)
+                if not phone_valid:
+                    st.error(f"❌ {phone_error}")
+                    return
+
+                # Validate email if provided
+                if email:
+                    email_valid, email_error = security.validate_email(email)
+                    if not email_valid:
+                        st.error(f"❌ {email_error}")
+                        return
+
+                # Validate password strength
+                password_strong, password_error = security.is_strong_password(password)
+                if not password_strong:
+                    st.error(f"❌ {password_error}")
+                    return
+
+                # Check if customer already exists
                 current_customers = load_customers()
 
                 if phone in current_customers:
-                    st.error("Account already exists")
+                    st.error("❌ An account with this phone number already exists")
                 else:
-                    # Add new customer
-                    current_customers[phone] = {
-                        "name": name,
-                        "password": password,
-                        "phone": phone,
-                    }
+                    try:
+                        # Hash the password
+                        hashed_password = security.hash_password(password)
 
-                    # Save to file
-                    save_customers(current_customers)
+                        # Add to local customer file
+                        current_customers[phone] = {
+                            "name": name,
+                            "password": hashed_password,
+                            "phone": phone,
+                            "email": email
+                        }
 
-                    st.success("Account created successfully!")
-                    st.info(f"📱 Login with: **{phone}**")
-                    st.session_state.page = 'customer_login'
-                    st.rerun()
+                        save_customers(current_customers)
+
+                        # Register in central customer database if available
+                        if PAYBACK_BACKEND_AVAILABLE:
+                            customer_db = CentralCustomerDB()
+                            central_customer = customer_db.create_customer(
+                                phone=phone,
+                                name=name,
+                                email=email,
+                                merchant_id='CUSTOMER_PORTAL'
+                            )
+
+                            localkard_id = central_customer['localkard_id']
+
+                            st.balloons()
+                            st.success("✓ Account created successfully!")
+                            st.markdown(f"""
+                            <div class='premium-card' style='margin-top: 1rem; text-align: center; padding: 1.5rem;'>
+                                <div style='color: {MD_COLORS['success']}; font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;'>
+                                    🎉 Welcome to LocalKard!
+                                </div>
+                                <div style='color: {MD_COLORS['text_dark']}; font-size: 0.95rem; margin-bottom: 0.5rem;'>
+                                    Your LocalKard ID: <strong>{localkard_id}</strong>
+                                </div>
+                                <div style='color: {MD_COLORS['text_muted']}; font-size: 0.85rem;'>
+                                    Start shopping at partner stores to earn points!
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            st.success("✓ Account created successfully!")
+
+                        st.info(f"📱 Login with: **{phone}**")
+
+                        import time
+                        time.sleep(2)
+                        st.session_state.page = 'customer_login'
+                        st.rerun()
+
+                    except Exception as e:
+                        st.error(f"❌ Error creating account: {str(e)}")
 
         st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
 
-        if st.button("Back to Login", key="back_to_customer_login", use_container_width=True):
+        if st.button("← Back to Login", key="back_to_customer_login", use_container_width=True):
             st.session_state.page = 'customer_login'
             st.rerun()
 

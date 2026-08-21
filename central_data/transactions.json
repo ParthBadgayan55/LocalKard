@@ -1,0 +1,46 @@
+[
+  {
+    "transaction_id": "TXN0000000001",
+    "type": "earn",
+    "customer_id": "LK00000001",
+    "merchant_id": "9876543210",
+    "amount": 500.0,
+    "points": 25.0,
+    "description": "Test purchase",
+    "timestamp": "2026-08-21 12:04:39",
+    "status": "completed",
+    "metadata": {
+      "points_breakdown": {
+        "base_points": 25.0,
+        "tier_bonus": 0.0,
+        "campaign_bonus": 0.0,
+        "total_points": 25.0,
+        "tier": "bronze",
+        "multiplier": 1.0,
+        "campaign_applied": ""
+      }
+    }
+  },
+  {
+    "transaction_id": "TXN0000000002",
+    "type": "earn",
+    "customer_id": "LK00000002",
+    "merchant_id": "M001",
+    "amount": 1000,
+    "points": 50.0,
+    "description": "Test purchase",
+    "timestamp": "2026-08-21 12:05:21",
+    "status": "completed",
+    "metadata": {
+      "points_breakdown": {
+        "base_points": 50.0,
+        "tier_bonus": 0.0,
+        "campaign_bonus": 0.0,
+        "total_points": 50.0,
+        "tier": "bronze",
+        "multiplier": 1.0,
+        "campaign_applied": ""
+      }
+    }
+  }
+]

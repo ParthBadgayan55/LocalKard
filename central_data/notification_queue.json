@@ -1,0 +1,10 @@
+{
+  "notifications": [],
+  "stats": {
+    "total_queued": 2,
+    "total_processed": 2,
+    "total_failed": 0,
+    "total_retried": 0
+  },
+  "timestamp": "2026-08-21T12:05:22.805966"
+}

@@ -1,0 +1,11 @@
+# WhatsApp Notification System Dependencies
+# Optional - only needed when using real API (WHATSAPP_MOCK_MODE = False)
+
+# For Twilio WhatsApp API
+twilio>=8.0.0
+
+# For HTTP requests (WATI.io)
+requests>=2.31.0
+
+# For async/threading support (already in Python stdlib)
+# No additional packages needed
