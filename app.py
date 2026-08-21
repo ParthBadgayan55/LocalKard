@@ -407,6 +407,12 @@ if 'current_user' not in st.session_state:
 
 # Sample data
 MERCHANTS = {
+    "LocalKard": {
+        "name": "LocalKard Demo Store",
+        "owner": "LocalKard Admin",
+        "password": "LocalKard@55",
+        "phone": "LocalKard",
+    },
     "9876543210": {
         "name": "Fresh Mart Grocery",
         "owner": "Rajesh Kumar",
@@ -422,6 +428,11 @@ MERCHANTS = {
 }
 
 CUSTOMERS = {
+    "LocalKard": {
+        "name": "LocalKard Demo User",
+        "password": "LocalKard@55",
+        "phone": "LocalKard",
+    },
     "9988776655": {
         "name": "Amit Patel",
         "password": "customer123",
@@ -571,7 +582,7 @@ def merchant_login_page():
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Demo credentials
-        st.info("📱 Demo: 9876543210 / merchant123")
+        st.info("🔑 Login: **LocalKard** | Password: **LocalKard@55**")
 
 # Customer Login
 def customer_login_page():
@@ -602,7 +613,7 @@ def customer_login_page():
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Demo credentials
-        st.info("📱 Demo: 9988776655 / customer123")
+        st.info("🔑 Login: **LocalKard** | Password: **LocalKard@55**")
 
 # Merchant Dashboard
 def merchant_dashboard():
