@@ -879,25 +879,25 @@ def merchant_signup_page():
         st.markdown('<div class="form-title">Merchant Signup</div>', unsafe_allow_html=True)
 
         # Basic Info
-        shop_name = st.text_input("Shop Name", placeholder="Enter your shop name", key="signup_shop_name")
-        owner_name = st.text_input("Owner Name", placeholder="Enter your name", key="signup_owner_name")
-        phone = st.text_input("Phone Number", placeholder="Enter your phone", key="signup_phone")
+        shop_name = st.text_input("Shop Name *", placeholder="Enter your shop name", key="signup_shop_name")
+        owner_name = st.text_input("Owner Name *", placeholder="Enter your name", key="signup_owner_name")
+        phone = st.text_input("Phone Number *", placeholder="Enter your phone", key="signup_phone")
 
         # Address Info
         st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📍 Shop Location</div>', unsafe_allow_html=True)
 
         col_addr1, col_addr2 = st.columns(2)
         with col_addr1:
-            locality = st.text_input("Locality", placeholder="e.g., Andheri West", key="signup_locality")
+            locality = st.text_input("Locality *", placeholder="e.g., Andheri West", key="signup_locality")
         with col_addr2:
-            pincode = st.text_input("Pincode", placeholder="e.g., 400053", key="signup_pincode")
+            pincode = st.text_input("Pincode *", placeholder="e.g., 400053", key="signup_pincode")
 
-        address = st.text_input("Full Address", placeholder="Street address", key="signup_address")
+        address = st.text_input("Full Address *", placeholder="Street address", key="signup_address")
 
         # Geo-location
-        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🗺️ Geo-Location</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🗺️ Geo-Location *</div>', unsafe_allow_html=True)
 
-        use_current = st.checkbox("📍 Use Current Location (GPS)", key="use_current_location")
+        use_current = st.checkbox("📍 Use Current Location (GPS) - Recommended", key="use_current_location", value=True)
 
         # Initialize session state for location
         if 'gps_latitude' not in st.session_state:
@@ -975,33 +975,55 @@ def merchant_signup_page():
 
         # Password
         st.markdown('<div style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🔒 Security</div>', unsafe_allow_html=True)
-        password = st.text_input("Password", type="password", placeholder="Create a password", key="signup_password")
-        confirm_password = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="signup_confirm_password")
+        password = st.text_input("Password *", type="password", placeholder="Min 6 characters", key="signup_password")
+        confirm_password = st.text_input("Confirm Password *", type="password", placeholder="Re-enter password", key="signup_confirm_password")
+
+        st.markdown('<div style="color: #a0a0c0; font-size: 0.85rem; margin-top: 0.5rem; text-align: center;">* Required fields</div>', unsafe_allow_html=True)
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
         if st.button("Create Account", key="merchant_signup_btn", use_container_width=True):
-            if not all([shop_name, owner_name, phone, password, confirm_password]):
-                st.error("Please fill all required fields (address fields optional)")
+            # Validate all required fields
+            if not shop_name:
+                st.error("❌ Shop Name is required")
+            elif not owner_name:
+                st.error("❌ Owner Name is required")
+            elif not phone:
+                st.error("❌ Phone Number is required")
+            elif not locality:
+                st.error("❌ Locality is required")
+            elif not pincode:
+                st.error("❌ Pincode is required")
+            elif not address:
+                st.error("❌ Full Address is required")
+            elif not latitude or not longitude:
+                st.error("❌ GPS Location is required. Please enable 'Use Current Location' or enter coordinates manually")
+            elif not password:
+                st.error("❌ Password is required")
+            elif not confirm_password:
+                st.error("❌ Please confirm your password")
             elif password != confirm_password:
-                st.error("Passwords do not match")
+                st.error("❌ Passwords do not match")
+            elif len(password) < 6:
+                st.error("❌ Password must be at least 6 characters long")
             elif phone in MERCHANTS:
-                st.error("Account already exists")
+                st.error("❌ Account already exists with this phone number")
             else:
-                # Add new merchant with location
+                # Add new merchant with complete location data
                 MERCHANTS[phone] = {
                     "name": shop_name,
                     "owner": owner_name,
                     "password": password,
                     "phone": phone,
-                    "address": address if address else "Not provided",
-                    "locality": locality if locality else "Not provided",
-                    "pincode": pincode if pincode else "000000",
-                    "latitude": float(latitude) if latitude else 19.0760,
-                    "longitude": float(longitude) if longitude else 72.8777,
+                    "address": address,
+                    "locality": locality,
+                    "pincode": pincode,
+                    "latitude": float(latitude),
+                    "longitude": float(longitude),
                 }
                 st.success("✓ Account created successfully!")
-                st.info(f"Login with: {phone}")
+                st.info(f"📱 Login with: **{phone}**")
+                st.balloons()
                 st.session_state.page = 'merchant_login'
                 st.rerun()
 
