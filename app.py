@@ -656,6 +656,42 @@ st.markdown("""
         margin-bottom: 0.6rem !important;
     }
 
+    /* Selectbox / Dropdown */
+    .stSelectbox > div > div {
+        background: rgba(255, 255, 255, 1) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+        border-radius: 12px !important;
+        color: #000000 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .stSelectbox > div > div > div {
+        color: #000000 !important;
+        font-size: 0.95rem !important;
+        padding: 1rem 1.2rem !important;
+    }
+
+    .stSelectbox > label {
+        color: #ffffff !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.6rem !important;
+        letter-spacing: 0.3px !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+        display: block !important;
+    }
+
+    .stSelectbox [data-baseweb="select"] {
+        background: rgba(255, 255, 255, 1) !important;
+    }
+
+    .stSelectbox [data-baseweb="select"] > div {
+        background: rgba(255, 255, 255, 1) !important;
+        border: 2px solid rgba(102, 126, 234, 0.3) !important;
+        border-radius: 12px !important;
+        color: #000000 !important;
+    }
+
     /* Checkbox */
     .stCheckbox > label {
         color: #ffffff !important;
