@@ -1030,8 +1030,7 @@ def merchant_login_page():
         st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Merchant Portal</div>', unsafe_allow_html=True)
 
-        username = st.text_input("Username", placeholder="Enter your username", key="merchant_username")
-        phone = st.text_input("Phone Number", placeholder="Enter your phone number", key="merchant_phone")
+        login_id = st.text_input("Username / Phone Number", placeholder="Enter username or phone", key="merchant_login")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="merchant_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
@@ -1039,8 +1038,6 @@ def merchant_login_page():
         if st.button("Sign In", key="merchant_login_btn", use_container_width=True):
             # Reload merchants to get latest data
             current_merchants = load_merchants()
-            # Check credentials using either username or phone
-            login_id = username if username else phone
             if login_id in current_merchants and current_merchants[login_id]["password"] == password:
                 st.session_state.logged_in = True
                 st.session_state.user_type = 'merchant'
@@ -1084,8 +1081,7 @@ def customer_login_page():
 
         st.markdown('<div style="color: #a0a0c0; font-size: 0.9rem; text-align: center; margin-bottom: 1.5rem;">Track your points, redeem rewards, and more!</div>', unsafe_allow_html=True)
 
-        username = st.text_input("Username", placeholder="Enter your username", key="customer_username")
-        phone = st.text_input("Phone Number", placeholder="Enter your 10-digit phone", key="customer_phone", max_chars=10)
+        login_id = st.text_input("Username / Phone Number", placeholder="Enter username or phone", key="customer_login")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="customer_pass")
 
         st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
@@ -1093,9 +1089,6 @@ def customer_login_page():
         if st.button("🔓 Sign In", key="customer_login_btn", use_container_width=True):
             # Reload customers to get latest data
             current_customers = load_customers()
-
-            # Check credentials using either username or phone
-            login_id = username if username else phone
 
             if login_id in current_customers:
                 stored_password = current_customers[login_id]["password"]
