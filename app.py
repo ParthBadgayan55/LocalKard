@@ -2701,6 +2701,7 @@ def merchant_signup_page():
 
         # Basic Info
         shop_name = st.text_input("Shop Name *", placeholder="Enter your shop name", key="signup_shop_name")
+        shop_type = st.selectbox("Shop Type *", options=["Grocery", "Pharmacy", "Electronics", "Others"], key="signup_shop_type")
         owner_name = st.text_input("Owner Name *", placeholder="Enter your name", key="signup_owner_name")
         phone = st.text_input("Phone Number *", placeholder="Enter your phone", key="signup_phone")
 
@@ -2837,6 +2838,7 @@ def merchant_signup_page():
                     # Add new merchant with complete location data
                     current_merchants[phone] = {
                         "name": shop_name,
+                        "shop_type": shop_type,
                         "owner": owner_name,
                         "password": password,
                         "phone": phone,
