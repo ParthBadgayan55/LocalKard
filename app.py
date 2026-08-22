@@ -2737,7 +2737,7 @@ def merchant_signup_page():
 
         # Basic Info
         shop_name = st.text_input("Shop Name *", placeholder="Enter your shop name", key="signup_shop_name")
-        shop_type = st.selectbox("Shop Type *", options=["Grocery", "Pharmacy", "Electronics", "Others"], key="signup_shop_type")
+        shop_type = st.selectbox("Shop Type *", options=["Select Shop Type", "Grocery", "Pharmacy", "Electronics", "Others"], key="signup_shop_type")
         owner_name = st.text_input("Owner Name *", placeholder="Enter your name", key="signup_owner_name")
         phone = st.text_input("Phone Number *", placeholder="Enter your phone", key="signup_phone")
 
@@ -2844,6 +2844,8 @@ def merchant_signup_page():
             # Validate all required fields
             if not shop_name:
                 st.error("❌ Shop Name is required")
+            elif shop_type == "Select Shop Type":
+                st.error("❌ Please select a Shop Type")
             elif not owner_name:
                 st.error("❌ Owner Name is required")
             elif not phone:
